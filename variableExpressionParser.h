@@ -1,5 +1,5 @@
 //
-// Copyright 2017 Pixar
+// Copyright 2023 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
 // with the following modification; you may not use this file except in
@@ -21,29 +21,40 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+#ifndef PXR_USD_SDF_VARIABLE_EXPRESSION_PARSER_H
+#define PXR_USD_SDF_VARIABLE_EXPRESSION_PARSER_H
+
 #include "pxr/pxr.h"
-#include "pxr/usd/sdf/pathParser.h"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
-int SdfPathYyparse(Sdf_PathParserContext *context)
+namespace Sdf_VariableExpressionImpl
 {
-    return pathYyparse(context);
+    class Node;
 }
 
-int SdfPathYylex_init(yyscan_t *yyscanner)
+/// \class Sdf_VariableExpressionParserResult
+/// Object containing results of parsing an expression.
+class Sdf_VariableExpressionParserResult
 {
-    return pathYylex_init(yyscanner);
-}
+public:
+    std::unique_ptr<Sdf_VariableExpressionImpl::Node> expression;
+    std::vector<std::string> errors;
+};
 
-int SdfPathYylex_destroy(yyscan_t yyscanner)
-{
-    return pathYylex_destroy(yyscanner);
-}
+/// Parse the given expression.
+Sdf_VariableExpressionParserResult
+Sdf_ParseVariableExpression(const std::string& expr);
 
-yy_buffer_state *SdfPathYy_scan_string(const char* str, yyscan_t yyscanner)
-{
-    return pathYy_scan_string(str, yyscanner);
-}
+/// Returns true if \p s is recognized as a variable expression.
+/// This does not check the syntax of the expression.
+bool Sdf_IsVariableExpression(const std::string& s);
 
 PXR_NAMESPACE_CLOSE_SCOPE
+
+#endif
+
