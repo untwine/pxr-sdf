@@ -5205,16 +5205,19 @@ SdfLayer::_Save(bool force) const
     }
 
     const ArResolvedPath path = GetResolvedPath();
-    if (path.empty())
+    if (path.empty()) {
         return false;
+    }
 
     // Skip saving if the file exists and the layer is clean.
-    if (!force && !IsDirty() && TfPathExists(path))
+    if (!force && !IsDirty() && ArGetResolver().Resolve(path)) {
         return true;
+    }
 
     if (!_WriteToFile(path, std::string(), 
-                      GetFileFormat(), GetFileFormatArguments()))
+                      GetFileFormat(), GetFileFormatArguments())) {
         return false;
+    }
 
     // Layer hints are invalidated by authoring so _hints must be reset now
     // that the layer has been marked as clean.  See GetHints().
