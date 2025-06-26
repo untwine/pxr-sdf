@@ -352,23 +352,6 @@ constexpr uint8_t USDC_MAJOR = 0;
 constexpr uint8_t USDC_MINOR = 12;
 constexpr uint8_t USDC_PATCH = 0;
 
-CrateFile::Version
-CrateFile::Version::FromString(char const *str)
-{
-    uint32_t maj, min, pat;
-    if (sscanf(str, "%u.%u.%u", &maj, &min, &pat) != 3 ||
-        maj > 255 || min > 255 || pat > 255) {
-        return Version();
-    }
-    return Version(maj, min, pat);
-}
-
-std::string
-CrateFile::Version::AsString() const {
-    return TfStringPrintf(
-        "%" PRId8 ".%" PRId8 ".%" PRId8, majver, minver, patchver);
-}
-
 constexpr CrateFile::Version
 _SoftwareVersion { USDC_MAJOR, USDC_MINOR, USDC_PATCH };
 
@@ -924,7 +907,7 @@ struct CrateFile::_PackingContext
         : fileName(fileName)
         , writeVersion(crate->_assetPath.empty() ?
                        GetVersionForNewlyCreatedFiles() :
-                       Version(crate->_boot))
+                       Version(crate->_boot.version))
         , bufferedOutput(_Get(outAsset))
         , outputAsset(std::move(outAsset)) {
         
@@ -1005,7 +988,8 @@ struct CrateFile::_PackingContext
         if (!writeVersion.CanRead(ver)) {
             TF_WARN("Upgrading crate file <%s> from version %s to %s: %s",
                     fileName.c_str(),
-                    writeVersion.AsString().c_str(), ver.AsString().c_str(),
+                    writeVersion.AsFullString().c_str(),
+                    ver.AsFullString().c_str(),
                     reason.c_str());
             writeVersion = ver;
         }
@@ -1240,7 +1224,7 @@ public:
             // Layer offsets were added to SdfPayload starting in 0.8.0. Files 
             // before that cannot have them.
             const bool canReadLayerOffset = 
-                (Version(crate->_boot) >= Version(0, 8, 0));
+                (Version(crate->_boot.version) >= Version(0, 8, 0));
             if (canReadLayerOffset) {
                 auto layerOffset = Read<SdfLayerOffset>();
                 return SdfPayload(assetPath, primPath, layerOffset);
@@ -1684,7 +1668,7 @@ struct CrateFile::_ValueHandler : _ValueHandlerBase
         reader.Seek(rep.GetPayload());
 
         // Check version
-        Version fileVer(reader.crate->_boot);
+        Version fileVer(reader.crate->_boot.version);
         if (fileVer < Version(0,5,0)) {
             // Read and discard shape size.
             reader.template Read<uint32_t>();
@@ -2260,20 +2244,20 @@ CrateFile::GetSoftwareVersion()
 TfToken const &
 CrateFile::GetSoftwareVersionToken()
 {
-    static TfToken tok(GetSoftwareVersion().AsString());
+    static TfToken tok(GetSoftwareVersion().AsFullString());
     return tok;
 }
 
 CrateFile::Version
 CrateFile::GetFileVersion() const
 {
-    return Version(_boot);
+    return Version(_boot.version);
 }
 
 TfToken
 CrateFile::GetFileVersionToken() const
 {
-    return TfToken(Version(_boot).AsString());
+    return TfToken(Version(_boot.version).AsFullString());
 }
 
 CrateFile::CrateFile(Options opt)
@@ -2753,7 +2737,7 @@ CrateFile::_AddSpec(const SdfPath &path, SdfSpecType type,
         // needs to be upgraded to 0.8.0 or higher for any reason.
         return (v.IsHolding<SdfPayload>() && 
                 v.UncheckedGet<SdfPayload>().GetLayerOffset().IsIdentity()) ||
-            (Version(this->_boot) < Version(0, 8, 0) &&
+            (Version(this->_boot.version) < Version(0, 8, 0) &&
              v.IsHolding<ValueRep>() &&
              v.UncheckedGet<ValueRep>().GetType() == TypeEnum::Payload);
     };
@@ -3320,11 +3304,11 @@ CrateFile::_ReadBootStrap(ByteStream src, int64_t fileSize)
         TF_RUNTIME_ERROR("Sdf crate bootstrap section corrupt");
     }
     // Check version.
-    else if (!_SoftwareVersion.CanRead(Version(b))) {
+    else if (!_SoftwareVersion.CanRead(Version(b.version))) {
         TF_RUNTIME_ERROR(
             "Sdf crate file version mismatch -- file is %s, "
-            "software supports %s", Version(b).AsString().c_str(),
-            _SoftwareVersion.AsString().c_str());
+            "software supports %s", Version(b.version).AsFullString().c_str(),
+            _SoftwareVersion.AsFullString().c_str());
     }
     // Check that the table of contents is not past the end of the file.  This
     // catches some cases where a file was corrupted by truncation.
@@ -3371,7 +3355,7 @@ CrateFile::_ReadFieldSets(Reader reader)
     if (auto fieldSetsSection = _toc.GetSection(_FieldSetsSectionName)) {
         reader.Seek(fieldSetsSection->start);
 
-        if (Version(_boot) < Version(0,4,0)) {
+        if (Version(_boot.version) < Version(0,4,0)) {
             _fieldSets = reader.template Read<decltype(_fieldSets)>();
         } else {
             // Compressed fieldSets in 0.4.0.
@@ -3399,7 +3383,7 @@ CrateFile::_ReadFields(Reader reader)
     TfAutoMallocTag tag("_ReadFields");
     if (auto fieldsSection = _toc.GetSection(_FieldsSectionName)) {
         reader.Seek(fieldsSection->start);
-        if (Version(_boot) < Version(0,4,0)) {
+        if (Version(_boot.version) < Version(0,4,0)) {
             _fields = reader.template Read<decltype(_fields)>();
         } else {
             // Compressed fields in 0.4.0.
@@ -3436,11 +3420,11 @@ CrateFile::_ReadSpecs(Reader reader)
     if (auto specsSection = _toc.GetSection(_SpecsSectionName)) {
         reader.Seek(specsSection->start);
         // VERSIONING: Have to read either old or new style specs.
-        if (Version(_boot) == Version(0,0,1)) {
+        if (Version(_boot.version) == Version(0,0,1)) {
             vector<Spec_0_0_1> old = reader.template Read<decltype(old)>();
             _specs.resize(old.size());
             copy(old.begin(), old.end(), _specs.begin());
-        } else if (Version(_boot) < Version(0,4,0)) {
+        } else if (Version(_boot.version) < Version(0,4,0)) {
             _specs = reader.template Read<decltype(_specs)>();
         } else {
             // Version 0.4.0 specs are compressed
@@ -3562,7 +3546,7 @@ CrateFile::_ReadTokens(Reader reader)
     RawDataPtr chars;
     char const *charsEnd = nullptr;
     
-    Version fileVer(_boot);
+    Version fileVer(_boot.version);
     if (fileVer < Version(0,4,0)) {
         // XXX: To support pread(), we need to read the whole thing into memory
         // to make tokens out of it.  This is a pessimization vs mmap, from
@@ -3634,7 +3618,7 @@ CrateFile::_ReadPaths(Reader reader)
 
     WorkDispatcher dispatcher;
     // VERSIONING: PathItemHeader changes size from 0.0.1 to 0.1.0.
-    Version fileVer(_boot);
+    Version fileVer(_boot.version);
     if (fileVer == Version(0,0,1)) {
         _ReadPathsImpl<_PathItemHeader_0_0_1>(reader, dispatcher);
     } else if (fileVer < Version(0,4,0)) {
@@ -3998,7 +3982,7 @@ CrateFile::_PackValue(VtValue const &v)
         // won't have a layer offset and will not be read correctly when reading
         // the new file.
         if (valueRep.GetType() == TypeEnum::Payload &&
-            Version(_boot) < Version(0, 8, 0) && 
+            Version(_boot.version) < Version(0, 8, 0) && 
             _packCtx->writeVersion >= Version(0, 8, 0)) {
             VtValue payloadValue;
             _UnpackValue(valueRep, &payloadValue);

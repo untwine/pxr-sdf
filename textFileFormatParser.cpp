@@ -11,9 +11,11 @@
 #include "pxr/base/trace/trace.h"
 #include "pxr/base/pegtl/pegtl/contrib/trace.hpp"
 #include "pxr/usd/ar/asset.h"
+#include "pxr/usd/sdf/fileIO.h"
 #include "pxr/usd/sdf/textParserContext.h"
 #include "pxr/usd/sdf/textFileFormatParser.h"
 #include "pxr/usd/sdf/debugCodes.h"
+#include "pxr/usd/sdf/usdaData.h"
 #include "pxr/usd/sdf/textParserHelpers.h"
 #include "pxr/base/ts/raii.h"
 #include "pxr/base/ts/spline.h"
@@ -1001,8 +1003,8 @@ struct TextParserAction<PathRef>
                 // The relocates map is expected to only hold absolute paths.
                 // The SdRelocatesMapProxy ensures that all paths are made
                 // absolute when editing, but since we're bypassing that proxy
-                // and setting the map directly into the underlying SdfData, we
-                // need to explicitly absolutize paths here.
+                // and setting the map directly into the underlying
+                // SdfUsdaData, we need to explicitly absolutize paths here.
                 const SdfPath srcPath = 
                     context.relocatesKey.MakeAbsolutePath(context.path);
                 const SdfPath targetPath =
@@ -4099,31 +4101,30 @@ struct TextParserAction<LayerHeader>
     template <class Input>
     static void apply(const Input& in, Sdf_TextParserContext& context)
     {
-        const std::string cookie = TfStringTrimRight(in.string());
+        const std::string header = TfStringTrimRight(in.string());
         const std::string expected = "#" +  context.magicIdentifierToken + " ";
-        if (TfStringStartsWith(cookie, expected))
-        {
-            if (!context.versionString.empty() && 
-                !TfStringEndsWith(cookie, context.versionString))
-            {
-                TF_WARN("File '%s' is not the latest %s version (found '%s', "
-                    "expected '%s'). The file may parse correctly and yield "
-                    "incorrect results.",
-                    context.fileContext.c_str(),
-                    context.magicIdentifierToken.c_str(),
-                    cookie.substr(expected.length()).c_str(),
-                    context.versionString.c_str());
-            }
-        }
-        else
-        {
-            // throw error
-            std::string errorMessage = TfStringPrintf(
-                "Magic Cookie '%s'.  Expected prefix of '%s'",
-                TfStringTrim(cookie).c_str(),
-                expected.c_str());
 
-            throw PEGTL_NS::parse_error(errorMessage, in);
+        if (TfStringStartsWith(header, expected)) {
+            // Looks promising, see if we can extract a version that we can
+            // read. Find the first non-space character after expected
+            const size_t beg = header.find_first_not_of(" ", expected.size());
+            const size_t end = header.find_first_of(" \t\n", beg);
+            const std::string versionStr = header.substr(beg, end - beg);
+
+            std::string reason;
+            SdfFileVersion layerVersion =
+                SdfUsdaData::ValidateLayerVersionString(versionStr,
+                                                        &reason);
+            if (layerVersion) {
+                context.data->SetLayerVersion(layerVersion);
+            } else {
+                throw PEGTL_NS::parse_error(reason, in);
+            }
+        } else {
+            const std::string reason = TfStringPrintf(
+                "Invalid layer header '%s' does not start with '%s'",
+                header.c_str(), expected.c_str());
+            throw PEGTL_NS::parse_error(reason, in);
         }
 
         context.nameChildrenStack.emplace_back();
@@ -4242,7 +4243,7 @@ struct TextParserAction<SublayerListClose>
 ////////////////////////////////////////////////////////////////////////
 // Parsing entry-point methods
 
-/// Parse a text layer into an SdfData
+/// Parse a text layer into an SdfUsdaData
 bool 
 Sdf_ParseLayer(
     const std::string& fileContext, 
@@ -4250,12 +4251,19 @@ Sdf_ParseLayer(
     const std::string& magicId,
     const std::string& versionString,
     bool metadataOnly,
-    SdfDataRefPtr data,
+    SdfUsdaDataRefPtr data,
     SdfLayerHints *hints)
 {
     TfAutoMallocTag2 tag("Sdf", "Sdf_ParseLayer");
 
     TRACE_FUNCTION();
+
+    if (!TF_VERIFY(data,
+                   "Invalid null SdfUsdaDataRefPtr pointer passed to"
+                   " Sdf_ParseLayer."))
+    {
+        return false;
+    }
 
     // Configure for input file.
     Sdf_TextParserContext context;
@@ -4372,18 +4380,25 @@ Sdf_ParseLayer(
     return status;
 }
 
-/// Parse a layer text string into an SdfData
+/// Parse a layer text string into an SdfUsdaData
 bool
 Sdf_ParseLayerFromString(
     const std::string & layerString, 
     const std::string & magicId,
     const std::string & versionString,
-    SdfDataRefPtr data,
+    SdfUsdaDataRefPtr data,
     SdfLayerHints *hints)
 {
     TfAutoMallocTag2 tag("Sdf", "Sdf_ParseLayerFromString");
 
     TRACE_FUNCTION();
+
+    if (!TF_VERIFY(data,
+                   "Invalid null SdfUsdaDataRefPtr pointer passed to"
+                   " Sdf_ParseLayerFromString."))
+    {
+        return false;
+    }
 
     // Configure for input string.
     Sdf_TextParserContext context;

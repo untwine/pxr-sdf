@@ -17,7 +17,6 @@
 #include "pxr/base/tf/stringUtils.h"
 #include "pxr/base/tf/token.h"
 #include "pxr/base/vt/value.h"
-#include "pxr/usd/sdf/data.h"
 #include "pxr/usd/sdf/debugCodes.h"
 #include "pxr/usd/sdf/listOp.h"
 #include "pxr/usd/sdf/path.h"
