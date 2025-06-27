@@ -222,6 +222,7 @@ pxr_test_scripts(
     testenv/testSdfVariableExpression.py
     testenv/testSdfVariants.py
     testenv/testSdfZipFile.py
+    testenv/testSdfZipFileLimits.py
 )
 
 pxr_build_test_shared_lib(TestSdfFileFormatCapabilities
@@ -674,6 +675,13 @@ pxr_register_test(testSdfZipFile
     PYTHON
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfZipFile"
     EXPECTED_RETURN_CODE 0
+)
+pxr_register_test(testSdfZipFileLimits
+    PYTHON
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfZipFileLimits"
+    EXPECTED_RETURN_CODE 0
+    ENV 
+        SDF_MAX_ZIPFILE_SIZE=195
 )
 pxr_register_test(testSdfZipFile_CPP
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfZipFile_CPP"
