@@ -1,0 +1,66 @@
+[build-system]
+requires = [
+    "scikit-build-core",
+    "pxr-arch-dev==25.5.1.*",
+    "pxr-tf-dev==25.5.1.*",
+    "pxr-gf-dev==25.5.1.*",
+    "pxr-pegtl-dev==25.5.1.*",
+    "pxr-trace-dev==25.5.1.*",
+    "pxr-ts-dev==25.5.1.*",
+    "pxr-vt-dev==25.5.1.*",
+    "pxr-work-dev==25.5.1.*",
+    "pxr-ar-dev==25.5.1.*",
+    "pxr-plug-dev==25.5.1.*",
+    "pxr-boost-dev==25.5.1.*",
+    "pxr-tbb-dev==2022.1.0.*"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pxr-sdf-dev"
+version = "25.5.1"
+description = "C++ headers and CMake config for developing with pxr-sdf"
+readme = "README.md"
+requires-python = ">=3.8"
+license-files = ["LICENSE.txt", "NOTICE.txt"]
+keywords = ["pixar", "open-usd", "dev"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+]
+dependencies = [
+    "pxr-arch-dev==25.5.1.*",
+    "pxr-tf-dev==25.5.1.*",
+    "pxr-gf-dev==25.5.1.*",
+    "pxr-pegtl-dev==25.5.1.*",
+    "pxr-trace-dev==25.5.1.*",
+    "pxr-ts-dev==25.5.1.*",
+    "pxr-vt-dev==25.5.1.*",
+    "pxr-work-dev==25.5.1.*",
+    "pxr-ar-dev==25.5.1.*",
+    "pxr-plug-dev==25.5.1.*",
+    "pxr-boost-dev==25.5.1.*",
+    "pxr-tbb-dev==2022.1.0.*"
+]
+
+[project.urls]
+Repository = "https://github.com/untwine/pxr-sdf"
+
+[tool.scikit-build]
+cmake.version = ">=3.21,<4"
+cmake.args = [
+    "-DBUILD_TESTS=OFF",
+    "-DBUILD_SHARED_LIBS=ON",
+    "-DBUILD_PYTHON_BINDINGS=ON",
+    "-DCMAKE_INSTALL_LIBDIR=pxr-sdf/lib",
+    "-DCMAKE_INSTALL_INCLUDEDIR=pxr-sdf/include",
+    "-DCMAKE_INSTALL_DATAROOTDIR=pxr-sdf",
+    "-DCMAKE_INSTALL_PYTHON_LIBDIR=pxr-sdf/lib/python",
+
+    # std::filesystem (used by PEGTL) needs macOS ≥10.15
+    "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
+]
+sdist.exclude = ["test", ".github"]

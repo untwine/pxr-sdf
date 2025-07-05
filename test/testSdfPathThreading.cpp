@@ -23,7 +23,7 @@ using std::string;
 using std::vector;
 
 using namespace pxr;
-using namespace pxr_CLI;
+using namespace pxr::CLI;
 
 static unsigned int randomSeed;
 static size_t numThreads;

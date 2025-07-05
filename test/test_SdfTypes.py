@@ -113,7 +113,7 @@ class TestSdfTypes(unittest.TestCase):
         self.assertEqual(
             Sdf.ConvertToValidMetadataDictionary({'a':[{}, {}]}),
             (False, {'a': None},
-             "first vector/list element <VtDictionary> '{}' under key 'a' "
+             "first vector/list element <pxr::VtDictionary> '{}' under key 'a' "
              "is not a valid scene description datatype"))
         assertEqualish(
             self,

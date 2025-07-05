@@ -1,0 +1,22 @@
+include(CMakeFindDependencyMacro)
+
+@PACKAGE_INIT@
+
+find_dependency(pxr-arch 0.25.5 REQUIRED)
+find_dependency(pxr-tf 0.25.5 REQUIRED)
+find_dependency(pxr-gf 0.25.5 REQUIRED)
+find_dependency(pxr-pegtl 0.25.5 REQUIRED)
+find_dependency(pxr-trace 0.25.5 REQUIRED)
+find_dependency(pxr-ts 0.25.5 REQUIRED)
+find_dependency(pxr-vt 0.25.5 REQUIRED)
+find_dependency(pxr-work 0.25.5 REQUIRED)
+find_dependency(pxr-ar 0.25.5 REQUIRED)
+find_dependency(pxr-plug 0.25.5 REQUIRED)
+find_dependency(TBB 2017.0 REQUIRED)
+
+set(_with_py_bindings "@BUILD_PYTHON_BINDINGS@")
+if(_with_py_bindings)
+    find_dependency(pxr-boost 0.25.5 REQUIRED)
+endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/pxr-sdf-targets.cmake)

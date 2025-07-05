@@ -7,11 +7,13 @@
 
 from pxr import Sdf
 import unittest
+import os
 
 class TestSdfColorConfig(unittest.TestCase):
     # Test the color config API on SdfLayer
     def test_LayerColorConfig(self):
-        filePath = 'testSdfColorConfig.testenv/colorConfig.sdf'
+        root = os.environ.get('TEST_COLOR_CONFIG_PATH')
+        filePath = os.path.join(root, 'colorConfig.sdf')
         layer = Sdf.Layer.FindOrOpen(filePath)
         self.assertTrue(layer is not None)
 
@@ -32,7 +34,8 @@ class TestSdfColorConfig(unittest.TestCase):
         self.assertFalse(layer.HasColorConfiguration())
 
     def test_AttrColorSpace(self):
-        filePath = 'testSdfColorConfig.testenv/colorSpace.sdf'
+        root = os.environ.get('TEST_COLOR_CONFIG_PATH')
+        filePath = os.path.join(root, 'colorSpace.sdf')
         layer = Sdf.Layer.FindOrOpen(filePath)
         self.assertTrue(layer is not None)
 

@@ -7,11 +7,13 @@
 
 from pxr import Sdf
 import unittest
+import os
 
 class TestSdfCustomLayer(unittest.TestCase):
     # Test the customLayerData API via Sdf's Layer API
     def test_BasicUsage(self):
-        filePath = 'testSdfCustomLayerData.testenv/layerAccess.sdf'
+        root = os.environ.get('TEST_CUSTOM_LAYER_DATA_PATH')
+        filePath = os.path.join(root, 'layerAccess.sdf')
         layer = Sdf.Layer.FindOrOpen(filePath)
         self.assertTrue(layer is not None)
 

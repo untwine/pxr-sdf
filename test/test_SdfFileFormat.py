@@ -47,7 +47,7 @@ class TestSdfFileFormat(unittest.TestCase):
 
         # FindAllDerivedFileFormatExtensions
         exts = Sdf.FileFormat.FindAllDerivedFileFormatExtensions(
-            Tf.Type.FindByName('SdfTextFileFormat'))
+            Tf.Type.FindByName('pxr::SdfTextFileFormat'))
         self.assertTrue('sdf' in exts)
         with self.assertRaises(Tf.ErrorException):
             Sdf.FileFormat.FindAllDerivedFileFormatExtensions(Tf.Type())

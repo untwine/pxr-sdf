@@ -3,9 +3,9 @@
         {
             "Info": {
                 "Types": {
-                    "TestSdfUnwritableFormat": {
+                    "pxr::TestSdfUnwritableFormat": {
                         "bases": [
-                            "SdfTextFileFormat"
+                            "pxr::SdfTextFileFormat"
                         ],
                         "displayName": "Format that does not support writing",
                         "extensions": [
@@ -15,9 +15,9 @@
                         "formatId": "TestSdfUnwritableFormat",
                         "primary": true
                     },
-                    "TestSdfUnreadableFormat": {
+                    "pxr::TestSdfUnreadableFormat": {
                         "bases": [
-                            "SdfTextFileFormat"
+                            "pxr::SdfTextFileFormat"
                         ],
                         "displayName": "Format that does not support reading",
                         "extensions": [
@@ -28,9 +28,9 @@
                         "primary": true,
                         "target": "test"
                     },
-                    "TestSdfUneditableFormat": {
+                    "pxr::TestSdfUneditableFormat": {
                         "bases": [
-                            "SdfTextFileFormat"
+                            "pxr::SdfTextFileFormat"
                         ],
                         "displayName": "Non-editable file format for testing",
                         "extensions": [
@@ -43,10 +43,8 @@
                     }
                 }
             },
-            "LibraryPath": "@TEST_PLUG_INFO_LIBRARY_PATH@",
+            "LibraryPath": "$<TARGET_FILE:TestSdfFileFormatCapabilities>",
             "Name": "TestSdfFileFormatCapabilities",
-            "ResourcePath": "@TEST_PLUG_INFO_RESOURCE_PATH@",
-            "Root": "@TEST_PLUG_INFO_ROOT@",
             "Type": "library"
         }
     ]

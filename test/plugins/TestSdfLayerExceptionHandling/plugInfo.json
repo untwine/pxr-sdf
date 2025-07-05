@@ -3,9 +3,9 @@
         {
             "Info": {
                 "Types": {
-                    "TestSdfExceptionHandlingFileFormat": {
+                    "pxr::TestSdfExceptionHandlingFileFormat": {
                         "bases": [
-                            "SdfTextFileFormat"
+                            "pxr::SdfTextFileFormat"
                         ],
                         "displayName": "File format that throws exceptions when opened",
                         "extensions": [
@@ -17,10 +17,8 @@
                     }
                 }
             },
-            "LibraryPath": "@TEST_PLUG_INFO_LIBRARY_PATH@",
+            "LibraryPath": "$<TARGET_FILE:TestSdfLayerExceptionHandling>",
             "Name": "TestSdfExceptionHandlingFileFormatPlugin",
-            "ResourcePath": "@TEST_PLUG_INFO_RESOURCE_PATH@",
-            "Root": "@TEST_PLUG_INFO_ROOT@",
             "Type": "library"
         }
     ]

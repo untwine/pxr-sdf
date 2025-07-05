@@ -3,14 +3,14 @@
         {
             "Info": {
                 "Types": {
-                    "TestSdfTargetFileFormatBase": {
+                    "pxr::TestSdfTargetFileFormatBase": {
                         "bases": [
-                            "SdfFileFormat"
+                            "pxr::SdfFileFormat"
                         ]
                     },
-                    "TestSdfTargetFileFormat_A": {
+                    "pxr::TestSdfTargetFileFormat_A": {
                         "bases": [
-                            "TestSdfTargetFileFormatBase"
+                            "pxr::TestSdfTargetFileFormatBase"
                         ],
                         "extensions": [
                             "test_target_format"
@@ -19,9 +19,9 @@
                         "primary": true,
                         "target": "A"
                     },
-                    "TestSdfTargetFileFormat_B": {
+                    "pxr::TestSdfTargetFileFormat_B": {
                         "bases": [
-                            "TestSdfTargetFileFormatBase"
+                            "pxr::TestSdfTargetFileFormatBase"
                         ],
                         "extensions": [
                             "test_target_format"
@@ -32,10 +32,8 @@
                     }
                 }
             },
-            "LibraryPath": "@TEST_PLUG_INFO_LIBRARY_PATH@",
+            "LibraryPath": "$<TARGET_FILE:TestSdfTargetFileFormat>",
             "Name": "TestSdfTargetFileFormat",
-            "ResourcePath": "@TEST_PLUG_INFO_RESOURCE_PATH@",
-            "Root": "@TEST_PLUG_INFO_ROOT@",
             "Type": "library"
         }
     ]

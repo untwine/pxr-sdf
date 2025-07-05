@@ -3,9 +3,9 @@
         {
             "Info": {
                 "Types": {
-                    "TestSdfStreamingFileFormat": {
+                    "pxr::TestSdfStreamingFileFormat": {
                         "bases": [
-                            "SdfFileFormat"
+                            "pxr::SdfFileFormat"
                         ],
                         "extensions": [
                             "test_streaming_format"
@@ -15,10 +15,8 @@
                     }
                 }
             },
-            "LibraryPath": "@TEST_PLUG_INFO_LIBRARY_PATH@",
+            "LibraryPath": "$<TARGET_FILE:TestSdfStreamingFileFormat>",
             "Name": "TestSdfStreamingFileFormat",
-            "ResourcePath": "@TEST_PLUG_INFO_RESOURCE_PATH@",
-            "Root": "@TEST_PLUG_INFO_ROOT@",
             "Type": "library"
         }
     ]

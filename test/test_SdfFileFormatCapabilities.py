@@ -7,16 +7,9 @@
 
 from __future__ import print_function
 import os, tempfile, unittest
-from pxr import Plug, Sdf, Tf
+from pxr import Sdf, Tf
 
 class TestSdfCapabilities(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Register dso plugins.
-        testRoot = os.path.join(os.path.dirname(__file__), 'SdfPlugins')
-        testPluginsDso = testRoot + '/lib'
-        testPluginsDsoSearch = testPluginsDso + '/*/Resources/'
-        Plug.Registry().RegisterPlugins(testPluginsDsoSearch)
 
     # sanity check for existing file formats which specify nothing in the
     # plugInfo.json file.
