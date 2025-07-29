@@ -81,11 +81,11 @@ _TestSdfLayerCreateDiffChangeListWithoutValues()
     expectedCl.DidRemovePrim(SdfPath("/a"), true);
     expectedCl.DidAddPrim(SdfPath("/n"), false);
     expectedCl.DidChangeInfo(SdfPath("/n"), SdfFieldKeys->Specifier, 
-        std::move(VtValue(SdfSpecifierOver)), VtValue(SdfSpecifierDef));
+        VtValue(SdfSpecifierOver), VtValue(SdfSpecifierDef));
     expectedCl.DidAddProperty(SdfPath("/n.propN"), false);
     expectedCl.DidAddPrim(SdfPath("/z"), false);
     expectedCl.DidChangeInfo(SdfPath("/z"), SdfFieldKeys->Specifier, 
-        std::move(VtValue(SdfSpecifierOver)), VtValue(SdfSpecifierDef));
+        VtValue(SdfSpecifierOver), VtValue(SdfSpecifierDef));
     expectedCl.DidRemoveProperty(SdfPath("/c.propC"), false);
     expectedCl.DidAddProperty(SdfPath("/c.propC"), false);
 
@@ -118,26 +118,26 @@ _TestSdfLayerCreateDiffChangeListWithValues()
     expectedCl.DidRemovePrim(SdfPath("/a"), true);
     expectedCl.DidAddPrim(SdfPath("/n"), false);
     expectedCl.DidChangeInfo(SdfPath("/n"), SdfFieldKeys->Specifier, 
-        std::move(VtValue(SdfSpecifierOver)), VtValue(SdfSpecifierDef));
+        VtValue(SdfSpecifierOver), VtValue(SdfSpecifierDef));
     expectedCl.DidChangeInfo(SdfPath("/r.propR"), SdfFieldKeys->Default, 
-        std::move(VtValue(1)), VtValue());
+        VtValue(1), VtValue());
     expectedCl.DidAddProperty(SdfPath("/n.propN"), true);
     expectedCl.DidChangeInfo(SdfPath("/n.propN"), 
-        SdfFieldKeys->TypeName, std::move(VtValue()), VtValue("int"));
+        SdfFieldKeys->TypeName, VtValue(), VtValue("int"));
     expectedCl.DidChangeInfo(SdfPath("/n.propN"), SdfFieldKeys->Default, 
-        std::move(VtValue()), VtValue(1));
+        VtValue(), VtValue(1));
     expectedCl.DidChangeInfo(SdfPath("/n.propN"), SdfFieldKeys->Custom, 
-        std::move(VtValue()), VtValue(0));
+        VtValue(), VtValue(0));
     expectedCl.DidChangeInfo(SdfPath("/n.propN"), 
-        SdfFieldKeys->Variability, std::move(VtValue()), 
+        SdfFieldKeys->Variability, VtValue(), 
         VtValue(SdfVariabilityVarying));
     expectedCl.DidChangeInfo(SdfPath("/p.propP"), SdfFieldKeys->Default, 
-        std::move(VtValue(1)), VtValue());
+        VtValue(1), VtValue());
     expectedCl.DidAddPrim(SdfPath("/z"), false);
     expectedCl.DidChangeInfo(SdfPath("/z"), SdfFieldKeys->Specifier, 
-        std::move(VtValue(SdfSpecifierOver)), VtValue(SdfSpecifierDef));
+        VtValue(SdfSpecifierOver), VtValue(SdfSpecifierDef));
     expectedCl.DidChangeInfo(SdfPath("/c.propC"), SdfFieldKeys->Default, 
-        std::move(VtValue(1)), VtValue(2));
+        VtValue(1), VtValue(2));
 
     // Copy the layer so we can verify it does not change during the operation
     SdfLayerRefPtr expectedLayer = SdfLayer::CreateAnonymous();
@@ -215,7 +215,7 @@ _testSdfLayerCreateDiffTimeSamplesWithValues()
     SdfTimeSampleMap samplesA = {{1, VtValue(100)}, {24, VtValue(500)}};
     SdfTimeSampleMap samplesB = {{1, VtValue(50)}, {48, VtValue(1000)}};
     expectedCl.DidChangeInfo(SdfPath("/PixarBall.radius"), 
-        SdfFieldKeys->TimeSamples, std::move(VtValue(samplesA)), 
+        SdfFieldKeys->TimeSamples, VtValue(samplesA), 
         VtValue(samplesB));
     expectedCl.DidChangeAttributeTimeSamples(SdfPath("/PixarBall.radius"));
 
@@ -302,7 +302,7 @@ _TestSdfLayerCreateDiffDiffWithOver()
         SdfChangeList expectedCl;
         expectedCl.DidAddPrim(SdfPath("/p"), false);
         expectedCl.DidChangeInfo(SdfPath("/p"), SdfFieldKeys->Specifier, 
-            std::move(VtValue(SdfSpecifierOver)), VtValue(SdfSpecifierDef));
+            VtValue(SdfSpecifierOver), VtValue(SdfSpecifierDef));
         SdfChangeList actualCl = empty->CreateDiff(layer);
         _CompareChangeLists(expectedCl, actualCl);
     }
