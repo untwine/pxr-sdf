@@ -23,6 +23,17 @@ SDF_API
 VtValue Sdf_ParseValueFromString(const std::string& input,
                                  const SdfValueTypeName& expectedSdfType);
 
+/// Add quotes around given string, escaping inner quotes and
+/// unprintable characters as necessary. If the string contains newlines
+/// it's quoted with triple quotes and the newlines are not escaped.
+SDF_API
+std::string Sdf_QuoteString(const std::string& input);
+
+/// Add @'s around a given path to produce a string representation of
+/// an asset path. If the path contains @, @@@ will be added around the
+/// path. If the path contains @@@, the contained @@@ will be escaped.
+SDF_API
+std::string Sdf_QuoteAssetPath(const std::string& path);
 
 PXR_NAMESPACE_CLOSE_SCOPE
 

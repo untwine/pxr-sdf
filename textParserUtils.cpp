@@ -7,6 +7,7 @@
 ///
 /// \file Sdf/textParserUtils.cpp
 
+#include "pxr/usd/sdf/fileIO_Common.h"
 #include "pxr/usd/sdf/textFileFormatParser.h"
 #include "pxr/usd/sdf/textParserUtils.h"
 
@@ -23,6 +24,18 @@ Sdf_ParseValueFromString(
         return outputValue;
     }
     return VtValue();
+}
+
+std::string
+Sdf_QuoteString(const std::string& input)
+{
+    return Sdf_FileIOUtility::Quote(input);
+}
+
+std::string
+Sdf_QuoteAssetPath(const std::string& path)
+{
+    return Sdf_FileIOUtility::QuoteAssetPath(path);
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE

@@ -120,6 +120,11 @@ public:
     static std::string Quote(const std::string &str);
     static std::string Quote(const TfToken &token);
 
+    /// Add @'s around a given path to produce a string representation of
+    /// an asset path. If the path contains @, @@@ will be added around the
+    /// path. If the path contains @@@, the contained @@@ will be escaped.
+    static std::string QuoteAssetPath(const std::string &path);
+
     // Create a string from a value and return it.  Use this form if you will
     // eventually write the string to \p eventualOutput.  This function will
     // call eventualOutput.RequestWriteVersionUpgrade() to upgrade the file

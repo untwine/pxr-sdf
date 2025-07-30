@@ -1080,6 +1080,12 @@ Sdf_FileIOUtility::Quote(const TfToken &token)
     return Quote(token.GetString());
 }
 
+string
+Sdf_FileIOUtility::QuoteAssetPath(const string &path)
+{
+    return _StringFromAssetPath(path);
+}
+
 template <class Fn>
 static string
 _StringFromVtValueImpl(const VtValue &value, Fn &&upgrade)

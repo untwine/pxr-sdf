@@ -15,6 +15,7 @@
 #include "pxr/usd/sdf/reference.h"
 #include "pxr/usd/sdf/relationshipSpec.h"
 #include "pxr/usd/sdf/schema.h"
+#include "pxr/usd/sdf/textParserUtils.h"
 
 #include <map>
 #include <sstream>
@@ -901,6 +902,18 @@ _TestSdfAbstractDataValue()
     TF_AXIOM(a.isValueBlock);
 }
 
+static void
+_TestSdfQuoteUtilities()
+{
+    TF_AXIOM(Sdf_QuoteString("\n") == "\"\"\"\n\"\"\"");
+    TF_AXIOM(Sdf_QuoteString("foo") == "\"foo\"");
+    TF_AXIOM(Sdf_QuoteString("foo\t") == "\"foo\\t\"");
+    TF_AXIOM(Sdf_QuoteString("\"doubled\"") == "'\"doubled\"'");
+    TF_AXIOM(Sdf_QuoteAssetPath("/path/foo") == "@/path/foo@");
+    TF_AXIOM(Sdf_QuoteAssetPath("atted@path") == "@@@atted@path@@@");
+    TF_AXIOM(Sdf_QuoteAssetPath("a@@@p") == "@@@a\\@@@p@@@");
+}
+
 int
 main(int argc, char **argv)
 {
@@ -920,6 +933,7 @@ main(int argc, char **argv)
     _TestSdfSchemaPathValidation();
     _TestSdfMapEditorProxyOperators();
     _TestSdfAbstractDataValue();
+    _TestSdfQuoteUtilities();
 
     return 0;
 }
