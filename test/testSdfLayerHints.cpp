@@ -14,12 +14,17 @@
 #include <pxr/arch/fileSystem.h>
 #include <pxr/tf/diagnostic.h>
 #include <pxr/tf/errorMark.h>
+#include <pxr/tf/getenv.h>
 
 SDF_NAMESPACE_USING_DIRECTIVE
 
 static void
 TestSdfLayerHintsMaybeHasRelocates()
 {
+    auto root = TF_NS::TfGetenv("DATA_PATH");
+    auto withRelocates = TF_NS::TfStringCatPaths(root, "with_relocates.usda");
+    auto withoutRelocates = TF_NS::TfStringCatPaths(root, "without_relocates.usda");
+
     // Test empty layer hints
     {
         SdfLayerRefPtr layer = SdfLayer::CreateAnonymous();
@@ -29,22 +34,19 @@ TestSdfLayerHintsMaybeHasRelocates()
 
     // Open layer without relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/without_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withoutRelocates);
         TF_AXIOM(!layer->GetHints().mightHaveRelocates);
     }
 
     // Open layer with relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/with_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withRelocates);
         TF_AXIOM(layer->GetHints().mightHaveRelocates);
     }
 
     // Author relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/without_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withoutRelocates);
         TF_AXIOM(!layer->GetHints().mightHaveRelocates);
 
         SdfPrimSpecHandle prim = layer->GetPrimAtPath(SdfPath("/Prim"));
@@ -62,8 +64,7 @@ TestSdfLayerHintsMaybeHasRelocates()
 
     // Transfer content without relocates
     {
-        SdfLayerRefPtr srcLayer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/without_relocates.usda");
+        SdfLayerRefPtr srcLayer = SdfLayer::FindOrOpen(withoutRelocates);
         SdfLayerRefPtr dstLayer = SdfLayer::CreateAnonymous(".usda");
         dstLayer->TransferContent(srcLayer);
         // Ideally, this would not hint maybe-has-relocates because the source
@@ -74,8 +75,7 @@ TestSdfLayerHintsMaybeHasRelocates()
 
     // Transfer content with relocates
     {
-        SdfLayerRefPtr srcLayer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/with_relocates.usda");
+        SdfLayerRefPtr srcLayer = SdfLayer::FindOrOpen(withRelocates);
         SdfLayerRefPtr dstLayer = SdfLayer::CreateAnonymous(".usda");
         dstLayer->TransferContent(srcLayer);
         TF_AXIOM(dstLayer->GetHints().mightHaveRelocates);
@@ -84,7 +84,7 @@ TestSdfLayerHintsMaybeHasRelocates()
     // Import without relocates
     {
         SdfLayerRefPtr layer = SdfLayer::CreateAnonymous(".usda");
-        layer->Import("testSdfLayerHints.testenv/without_relocates.usda");
+        layer->Import(withoutRelocates);
         // Similar to TransferContent, importing layer contents dirties the
         // layer and, therefore, hints indicate that there may be relocates.
         TF_AXIOM(layer->GetHints().mightHaveRelocates);
@@ -93,7 +93,7 @@ TestSdfLayerHintsMaybeHasRelocates()
     // Import with relocates
     {
         SdfLayerRefPtr layer = SdfLayer::CreateAnonymous(".usda");
-        layer->Import("testSdfLayerHints.testenv/with_relocates.usda");
+        layer->Import(withRelocates);
         TF_AXIOM(layer->GetHints().mightHaveRelocates);
     }
 
@@ -140,32 +140,28 @@ TestSdfLayerHintsMaybeHasRelocates()
 
     // Export without relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/without_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withoutRelocates);
         layer->Export(ArchMakeTmpFileName("testSdfLayerHints_", ".usda"));
         TF_AXIOM(!layer->GetHints().mightHaveRelocates);
     }
 
     // Export with relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/with_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withRelocates);
         layer->Export(ArchMakeTmpFileName("testSdfLayerHints_", ".usda"));
         TF_AXIOM(layer->GetHints().mightHaveRelocates);
     }
 
     // Clear without relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/without_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withoutRelocates);
         layer->Clear();
         TF_AXIOM(layer->GetHints().mightHaveRelocates);
     }
 
     // Clear with relocates
     {
-        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(
-            "testSdfLayerHints.testenv/with_relocates.usda");
+        SdfLayerRefPtr layer = SdfLayer::FindOrOpen(withRelocates);
         layer->Clear();
         TF_AXIOM(layer->GetHints().mightHaveRelocates);
     }

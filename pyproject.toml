@@ -1,0 +1,65 @@
+[build-system]
+requires = [
+    "scikit-build-core",
+    "pxr-arch-dev==25.8.*",
+    "pxr-tf-dev==25.8.*",
+    "pxr-gf-dev==25.8.*",
+    "pxr-pegtl-dev==25.8.*",
+    "pxr-trace-dev==25.8.*",
+    "pxr-ts-dev==25.8.*",
+    "pxr-vt-dev==25.8.*",
+    "pxr-work-dev==25.8.*",
+    "pxr-ar-dev==25.8.*",
+    "pxr-plug-dev==25.8.*",
+    "pxr-boost-dev==25.8.*",
+    "pxr-tbb-dev==2022.2.0.*"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pxr-sdf"
+version = "25.8"
+description = "Core library for scene description and serialization used in OpenUSD"
+readme = "README.md"
+requires-python = ">=3.8"
+license-files = ["LICENSE.txt", "NOTICE.txt"]
+keywords = ["pixar", "open-usd"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+]
+dependencies = [
+    "pxr-arch==25.8.*",
+    "pxr-tf==25.8.*",
+    "pxr-gf==25.8.*",
+    "pxr-trace==25.8.*",
+    "pxr-ts==25.8.*",
+    "pxr-vt==25.8.*",
+    "pxr-work==25.8.*",
+    "pxr-ar==25.8.*",
+    "pxr-plug==25.8.*",
+    "pxr-boost==25.8.*",
+    "pxr-tbb==2022.2.0.*"
+]
+
+[project.urls]
+Repository = "https://github.com/untwine/pxr-sdf"
+
+[tool.scikit-build]
+cmake.version = ">=3.23,<4.2"
+cmake.args = [
+    "-DBUILD_TESTS=OFF",
+    "-DBUILD_SHARED_LIBS=ON",
+    "-DBUILD_PYTHON_BINDINGS=ON",
+    "-DCMAKE_INSTALL_LIBDIR=pxr/.libs",
+    "-DCMAKE_INSTALL_INCLUDEDIR=pxr-sdf/include",
+    "-DCMAKE_INSTALL_DATAROOTDIR=pxr-sdf",
+    "-DCMAKE_INSTALL_PYTHON_LIBDIR=.",
+
+    # std::filesystem (used by PEGTL) needs macOS ≥10.15
+    "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15"
+]
+wheel.exclude = ["pxr-sdf"]
+sdist.exclude = ["test", ".github"]

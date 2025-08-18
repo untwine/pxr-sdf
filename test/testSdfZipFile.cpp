@@ -9,6 +9,8 @@
 
 #include <pxr/sdf/zipFile.h>
 #include <pxr/tf/diagnosticLite.h>
+#include <pxr/tf/stringUtils.h>
+#include <pxr/tf/getenv.h>
 
 #include <string>
 #include <cstring>
@@ -18,7 +20,9 @@ SDF_NAMESPACE_USING_DIRECTIVE
 static void
 TestIterators()
 {
-    SdfZipFile zipFile = SdfZipFile::Open("test_reader.usdz");
+    auto root = TF_NS::TfGetenv("DATA_PATH");
+    auto zipPath = TF_NS::TfStringCatPaths(root, "test_reader.usdz");
+    SdfZipFile zipFile = SdfZipFile::Open(zipPath);
     TF_AXIOM(zipFile);
 
     // Test various operators.

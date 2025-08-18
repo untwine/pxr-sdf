@@ -27,6 +27,7 @@
 #include <pxr/tf/stringUtils.h>
 #include <iostream>
 #include <string>
+#include <pxr/tf/getenv.h>
 
 SDF_NAMESPACE_USING_DIRECTIVE
 
@@ -191,7 +192,7 @@ void CheckExtraInfo(
 int main()
 {
     // Load a plugin that defines the test fields
-    const string pluginPath = TfAbsPath("testSdfMetaDataPlugInfo.testenv");
+    const string pluginPath = TF_NS::TfGetenv("PLUGIN_PATH");
     cout << "Registering metadata from " << pluginPath << "\n";
 
     PlugPluginPtrVector plugins =

@@ -261,7 +261,7 @@ class TestSdfParsing(unittest.TestCase):
         layerFileOut2 = CreateTempFile('ExportToString')
         layerFileOut3 = CreateTempFile('MetadataOnly')
 
-        layerDir = os.path.join(os.getcwd(), 'testSdfParsing.testenv')
+        layerDir = os.environ["TEST_PARSING_PATH"]
         baselineDir = os.path.join(layerDir, 'baseline')
 
         print("LAYERDIR: %s"%layerDir)

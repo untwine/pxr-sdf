@@ -13,6 +13,8 @@
 
 #include <pxr/tf/diagnostic.h>
 #include <pxr/arch/fileSystem.h>
+#include <pxr/tf/stringUtils.h>
+#include <pxr/tf/getenv.h>
 
 #include <iostream>
 #include <memory>
@@ -29,27 +31,33 @@ TestOpenAsset()
 
     ArResolver& resolver = ArGetResolver();
 
+    auto root = TF_NS::TfGetenv("DATA_PATH");
+    auto path = TF_NS::TfStringCatPaths(root, "test.usdz[bogus.file]");
+
     std::shared_ptr<ArAsset> usdzAsset = 
-        resolver.OpenAsset(ArResolvedPath("test.usdz[bogus.file]"));
+        resolver.OpenAsset(ArResolvedPath(path));
     TF_AXIOM(!usdzAsset);
 
-    auto testAsset = [&resolver](
+    auto testAsset = [&root, &resolver](
         const std::string& packageRelativePath,
         const std::string& srcFilePath,
         size_t expectedSize, size_t expectedOffset) {
+
+        auto packagePath = TF_NS::TfStringCatPaths(root, packageRelativePath);
+        auto path = TF_NS::TfStringCatPaths(root, srcFilePath);
 
         std::cout << "  - " << packageRelativePath << std::endl;
 
         // Verify that we can open the file within the .usdz file and the
         // size is what we expect.
         std::shared_ptr<ArAsset> asset = 
-            resolver.OpenAsset(ArResolvedPath(packageRelativePath));
+            resolver.OpenAsset(ArResolvedPath(packagePath));
         TF_AXIOM(asset);
         TF_AXIOM(asset->GetSize() == expectedSize);
 
         // Read in the file data from the asset in various ways and ensure
         // they match the source file.
-        ArchConstFileMapping srcFile = ArchMapFileReadOnly(srcFilePath);
+        ArchConstFileMapping srcFile = ArchMapFileReadOnly(path);
         TF_AXIOM(srcFile);
         TF_AXIOM(ArchGetFileMappingLength(srcFile) == expectedSize);
 

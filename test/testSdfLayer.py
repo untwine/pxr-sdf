@@ -19,16 +19,9 @@ Ar.SetPreferredResolver(preferredResolver)
 
 # Import other modules from pxr after Ar to ensure we don't pull on Ar
 # before the preferred resolver has been specified.
-from pxr import Sdf, Tf, Plug
+from pxr import Sdf, Tf
 
 class TestSdfLayer(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Register dso plugins.
-        testRoot = os.path.join(os.path.dirname(__file__), 'SdfPlugins')
-        testPluginsDso = testRoot + '/lib'
-        testPluginsDsoSearch = testPluginsDso + '/*/Resources/'
-        Plug.Registry().RegisterPlugins(testPluginsDsoSearch)
 
     def test_IdentifierWithArgs(self):
         paths = [

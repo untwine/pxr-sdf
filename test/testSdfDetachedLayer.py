@@ -7,20 +7,13 @@
 
 import os, unittest
 
-from pxr import Plug, Sdf
+from pxr import Sdf
 
 def DetachedLayerRulesEnvVarIsSet():
     return ('SDF_LAYER_INCLUDE_DETACHED' in os.environ or
             'SDF_LAYER_EXCLUDE_DETACHED' in os.environ)
 
 class TestSdfLayer(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Register dso plugins.
-        testRoot = os.path.join(os.path.dirname(__file__), 'SdfPlugins')
-        testPluginsDso = testRoot + '/lib'
-        testPluginsDsoSearch = testPluginsDso + '/*/Resources/'
-        Plug.Registry().RegisterPlugins(testPluginsDsoSearch)
 
     def setUp(self):
         if not DetachedLayerRulesEnvVarIsSet():

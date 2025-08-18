@@ -28,10 +28,16 @@ class TestSdfZipFile(unittest.TestCase):
 
     def test_Reader(self):
         """Test Sdf.ZipFileReader"""
-        zf = Sdf.ZipFile.Open("nonexistent.usdz")
+        root = os.environ["TEST_ZIP_FILE_PATH"]
+        pathA = os.path.join(root, "src/a.test")
+        pathB = os.path.join(root, "src/b.png")
+        pathC = os.path.join(root, "src/sub/c.png")
+        pathD = os.path.join(root, "src/sub/d.txt")
+
+        zf = Sdf.ZipFile.Open(os.path.join(root, "nonexistent.usdz"))
         self.assertIsNone(zf)
 
-        zf = Sdf.ZipFile.Open("test_reader.usdz")
+        zf = Sdf.ZipFile.Open(os.path.join(root, "test_reader.usdz"))
         self.assertTrue(zf)
         self.assertEqual(
             zf.GetFileNames(), ["a.test", "b.png", "sub/c.png", "sub/d.txt"])
@@ -53,7 +59,7 @@ class TestSdfZipFile(unittest.TestCase):
         self.assertEqual(fileInfo.compressionMethod, 0)
         self.assertFalse(fileInfo.encrypted)
         self._ValidateSourceAndZippedFile(
-            "src/a.test", zf, "a.test", fixLineEndings)
+            pathA, zf, "a.test", fixLineEndings)
 
         fileInfo = zf.GetFileInfo("b.png")
         self.assertEqual(fileInfo.dataOffset, 192)
@@ -62,7 +68,7 @@ class TestSdfZipFile(unittest.TestCase):
         self.assertEqual(fileInfo.crc, 384784137)
         self.assertEqual(fileInfo.compressionMethod, 0)
         self.assertFalse(fileInfo.encrypted)
-        self._ValidateSourceAndZippedFile("src/b.png", zf, "b.png")
+        self._ValidateSourceAndZippedFile(pathB, zf, "b.png")
 
         fileInfo = zf.GetFileInfo("sub/c.png")
         self.assertEqual(fileInfo.dataOffset, 7488)
@@ -71,7 +77,7 @@ class TestSdfZipFile(unittest.TestCase):
         self.assertEqual(fileInfo.crc, 2488450460)
         self.assertEqual(fileInfo.compressionMethod, 0)
         self.assertFalse(fileInfo.encrypted)
-        self._ValidateSourceAndZippedFile("src/sub/c.png", zf, "sub/c.png")
+        self._ValidateSourceAndZippedFile(pathC, zf, "sub/c.png")
 
         fileInfo = zf.GetFileInfo("sub/d.txt")
         self.assertEqual(fileInfo.dataOffset, 13696)
@@ -81,10 +87,14 @@ class TestSdfZipFile(unittest.TestCase):
         self.assertEqual(fileInfo.compressionMethod, 0)
         self.assertFalse(fileInfo.encrypted)
         self._ValidateSourceAndZippedFile(
-            "src/sub/d.txt", zf, "sub/d.txt", fixLineEndings)
+            pathD, zf, "sub/d.txt", fixLineEndings)
         
     def test_Writer(self):
         """Test Sdf.ZipFileWriter"""
+        root = os.environ["TEST_ZIP_FILE_PATH"]
+        pathA = root + "/src/a.test"
+        pathB = root + "/src/b.png"
+
         if os.path.isfile("test_writer.usdz"):
             os.remove("test_writer.usdz")
 
@@ -95,17 +105,17 @@ class TestSdfZipFile(unittest.TestCase):
             # writer or the writer is destroyed.
             self.assertFalse(os.path.isfile("test_writer.usdz"))
             
-            addedFile = zfw.AddFile("src/a.test")
-            self.assertEqual(addedFile, "src/a.test")
+            addedFile = zfw.AddFile(pathA)
+            self.assertEqual(addedFile, pathA)
 
-            addedFile = zfw.AddFile("src/b.png", "b.png")
+            addedFile = zfw.AddFile(pathB, "b.png")
             self.assertEqual(addedFile, "b.png")
 
         self.assertTrue(os.path.isfile("test_writer.usdz"))
         
         # Verify that the zip file can be read by Sdf.ZipFile.
         zf = Sdf.ZipFile.Open("test_writer.usdz")
-        self.assertEqual(zf.GetFileNames(), ["src/a.test", "b.png"])
+        self.assertEqual(zf.GetFileNames(), [pathA, "b.png"])
 
         # Since we're writing files into a .usdz and then extracting
         # and comparing them to the original file, we don't need to
@@ -120,11 +130,11 @@ class TestSdfZipFile(unittest.TestCase):
             with open(file, "rb") as f:
                 return zlib.crc32(f.read())
 
-        fileInfo = zf.GetFileInfo("src/a.test")
+        fileInfo = zf.GetFileInfo(pathA)
         self.assertEqual(fileInfo.dataOffset, 64)
-        self.assertEqual(fileInfo.size, _GetFileSize("src/a.test"))
-        self.assertEqual(fileInfo.uncompressedSize, _GetFileSize("src/a.test"))
-        self.assertEqual(fileInfo.crc, _ComputeCRC("src/a.test"))
+        self.assertEqual(fileInfo.size, _GetFileSize(pathA))
+        self.assertEqual(fileInfo.uncompressedSize, _GetFileSize(pathA))
+        self.assertEqual(fileInfo.crc, _ComputeCRC(pathA))
         self.assertEqual(fileInfo.compressionMethod, 0)
         self.assertFalse(fileInfo.encrypted)
 
@@ -137,8 +147,8 @@ class TestSdfZipFile(unittest.TestCase):
         self.assertFalse(fileInfo.encrypted)
 
         self._ValidateSourceAndZippedFile(
-            "src/a.test", zf, "src/a.test", dontFixLineEndings)
-        self._ValidateSourceAndZippedFile("src/b.png", zf, "b.png")
+            pathA, zf, pathA, dontFixLineEndings)
+        self._ValidateSourceAndZippedFile(pathB, zf, "b.png")
 
         # Verify that the data offset for all files in the archive are
         # aligned on 64-byte boundaries.
@@ -148,12 +158,12 @@ class TestSdfZipFile(unittest.TestCase):
         # Verify that zip file can be read by third-party zip libraries
         # (in this case, Python's zip module)
         zf = zipfile.ZipFile("test_writer.usdz")
-        self.assertEqual(zf.namelist(), ["src/a.test", "b.png"])
+        self.assertEqual(zf.namelist(), [pathA, "b.png"])
         self.assertIsNone(zf.testzip())
 
         self._ValidateSourceAndZippedFile(
-            "src/a.test", zf, "src/a.test", dontFixLineEndings)
-        self._ValidateSourceAndZippedFile("src/b.png", zf, "b.png")
+            pathA, zf, pathA, dontFixLineEndings)
+        self._ValidateSourceAndZippedFile(pathB, zf, "b.png")
 
     def test_WriterAlignment(self):
         """Test that Sdf.ZipFileWriter writes files so that they're aligned
