@@ -1,0 +1,33 @@
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+// Modified by Jeremy Retailleau.
+
+#ifndef PXR_SDF_H
+#define PXR_SDF_H
+
+#define SDF_MAJOR_VERSION @PROJECT_VERSION_MAJOR@
+#define SDF_MINOR_VERSION @PROJECT_VERSION_MINOR@
+#define SDF_PATCH_VERSION @PROJECT_VERSION_PATCH@
+
+#define SDF_VERSION (SDF_MAJOR_VERSION * 10000 \
+                   + SDF_MINOR_VERSION * 100   \
+                   + SDF_PATCH_VERSION)
+
+#define SDF_NS pxr
+#define SDF_INTERNAL_NS pxrInternal_v@PROJECT_VERSION_MAJOR@_@PROJECT_VERSION_MINOR@_@PROJECT_VERSION_PATCH@__pxrReserved__
+#define SDF_NS_GLOBAL ::SDF_NS
+
+namespace SDF_INTERNAL_NS { }
+
+namespace SDF_NS {
+    using namespace SDF_INTERNAL_NS;
+}
+
+#define SDF_NAMESPACE_OPEN_SCOPE   namespace SDF_INTERNAL_NS {
+#define SDF_NAMESPACE_CLOSE_SCOPE  }
+#define SDF_NAMESPACE_USING_DIRECTIVE using namespace SDF_NS;
+
+#endif // PXR_SDF_H
