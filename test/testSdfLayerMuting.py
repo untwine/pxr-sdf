@@ -3,7 +3,7 @@
 # Licensed under the terms set forth in the LICENSE.txt file available at
 # https://openusd.org/license.
 
-from pxr import Sdf
+from pxr import Sdf, Ar
 import unittest
 import os
 
@@ -23,8 +23,13 @@ class TestSdfLayerMuting(unittest.TestCase):
 
         pathB = os.path.join(root, 'b.usda')
 
+        # Windows paths must use resolved identifiers (slashes differ)
+        # See https://github.com/PixarAnimationStudios/OpenUSD/issues/3721
+        idA = Ar.GetResolver().CreateIdentifierForNewAsset(pathA)
+        idB = Ar.GetResolver().CreateIdentifierForNewAsset(pathB)
+
         # Mute layer B before opening it
-        Sdf.Layer.AddToMutedLayers(pathB)
+        Sdf.Layer.AddToMutedLayers(idB)
 
         layerB = Sdf.Layer.FindOrOpen(pathB)
         self.assertTrue(layerB is not None)
@@ -33,8 +38,8 @@ class TestSdfLayerMuting(unittest.TestCase):
         self.assertTrue(layerB.GetPrimAtPath('/Test') is None)
 
         # Now mute layer A and unmute layer B
-        Sdf.Layer.AddToMutedLayers(pathA)
-        Sdf.Layer.RemoveFromMutedLayers(pathB)
+        Sdf.Layer.AddToMutedLayers(idA)
+        Sdf.Layer.RemoveFromMutedLayers(idB)
 
         self.assertTrue(layerA.IsMuted())
         self.assertTrue(layerA.empty)
