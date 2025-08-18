@@ -8,6 +8,7 @@
 #ifndef PXR_USD_SDF_BOOLEAN_EXPRESSION_H
 #define PXR_USD_SDF_BOOLEAN_EXPRESSION_H
 
+#include <pxr/sdf/pxr.h>
 #include <pxr/sdf/api.h>
 
 #include <pxr/tf/declarePtrs.h>

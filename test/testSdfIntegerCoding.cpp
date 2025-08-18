@@ -9,7 +9,7 @@
 
 #include <pxr/tf/diagnostic.h>
 
-#include "../integerCoding.h"
+#include <pxr/sdf/integerCoding.h>
 
 #include <cstdlib>
 #include <vector>

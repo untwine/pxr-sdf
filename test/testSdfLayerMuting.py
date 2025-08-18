@@ -5,6 +5,7 @@
 
 from pxr import Sdf
 import unittest
+import os
 
 class TestSdfLayerMuting(unittest.TestCase):
     
@@ -12,14 +13,15 @@ class TestSdfLayerMuting(unittest.TestCase):
         '''Unmuting an initially muted layer should unmute the 
            layer and load the file.'''
 
-        pathA = 'testSdfLayerMuting.testenv/a.usda'
+        root = os.environ['TEST_LAYER_MUTING_PATH']
+        pathA = os.path.join(root, 'a.usda')
         layerA = Sdf.Layer.FindOrOpen(pathA)
         self.assertTrue(layerA is not None)
         self.assertFalse(layerA.IsMuted())
         self.assertFalse(layerA.empty)
         self.assertTrue(layerA.GetPrimAtPath('/Test') is not None)
 
-        pathB = 'testSdfLayerMuting.testenv/b.usda'
+        pathB = os.path.join(root, 'b.usda')
 
         # Mute layer B before opening it
         Sdf.Layer.AddToMutedLayers(pathB)

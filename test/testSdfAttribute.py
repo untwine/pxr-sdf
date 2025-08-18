@@ -10,6 +10,7 @@ import sys, unittest
 
 # This class is derived by format-specific test cases below.
 class TestSdfAttributeBase():
+    __test__ = False
 
     def CreateAnonymous(self):
         return Sdf.Layer.CreateAnonymous(self.extension)
@@ -838,9 +839,11 @@ def Sphere "Foo"
 
 
 class TestSdfAttributeUsda(TestSdfAttributeBase, unittest.TestCase):
+    __test__ = True
     extension = 'usda'
 
 class TestSdfAttributeUsdc(TestSdfAttributeBase, unittest.TestCase):
+    __test__ = True
     extension = 'usdc'
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@
 #ifndef PXR_USD_SDF_TEXT_PARSER_UTILS_H
 #define PXR_USD_SDF_TEXT_PARSER_UTILS_H
 
+#include <pxr/sdf/pxr.h>
 #include <pxr/vt/value.h>
 #include <pxr/sdf/api.h>
 
