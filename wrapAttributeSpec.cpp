@@ -201,6 +201,7 @@ void wrapAttributeSpec()
         .def("SetTimeSample", &_SetTimeSample)
         .def("EraseTimeSample", &_EraseTimeSample)
 
+        .def("HasSpline", &This::HasSpline)
         .def("GetSpline",
              &This::GetSpline,
              return_value_policy<return_by_value>())

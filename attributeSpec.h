@@ -170,6 +170,10 @@ public:
     
     /// \name Spline API
     /// @{
+    /// Returns true if this attribute has a TsSpline value authored.
+    SDF_API
+    bool HasSpline() const;
+
     /// Returns the TsSpline at this attribute spec if a spec exists, otherwise
     /// an empty spline is returned.
     SDF_API

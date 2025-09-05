@@ -149,6 +149,7 @@ SdfAttributeSpec::ClearConnectionPaths()
 
 // Attribute Value API
 
+SDF_DEFINE_HAS(Spline, SdfFieldKeys->Spline)
 SDF_DEFINE_GET(Spline, SdfFieldKeys->Spline, TsSpline)
 
 void
