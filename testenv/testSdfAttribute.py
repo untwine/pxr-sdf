@@ -197,6 +197,22 @@ class TestSdfAttributeBase():
         self.assertFalse(attr.HasInfo('displayGroup'))
         self.assertEqual(attr.displayGroup, '')
 
+        # arraySizeConstraint
+        self.assertFalse(attr.HasArraySizeConstraint())
+        self.assertEqual(attr.arraySizeConstraint, 0)
+
+        attr.arraySizeConstraint = 10
+        self.assertEqual(attr.arraySizeConstraint, 10)
+        self.assertTrue(attr.HasArraySizeConstraint())
+
+        attr.arraySizeConstraint = -10
+        self.assertEqual(attr.arraySizeConstraint, -10)
+        self.assertTrue(attr.HasArraySizeConstraint())
+
+        attr.ClearArraySizeConstraint()
+        self.assertEqual(attr.arraySizeConstraint, 0)
+        self.assertFalse(attr.HasArraySizeConstraint())
+
     def test_ClearUnexpectedField(self):
         layer = self.CreateAnonymous()
         layer.ImportFromString(

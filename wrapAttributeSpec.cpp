@@ -191,6 +191,13 @@ void wrapAttributeSpec()
         .def("HasLimits", &This::HasLimits)
         .def("ClearLimits", &This::ClearLimits)
 
+        .add_property("arraySizeConstraint",
+            &This::GetArraySizeConstraint,
+            &This::SetArraySizeConstraint,
+            "The array size constraint value of this attribute.")
+        .def("HasArraySizeConstraint", &This::HasArraySizeConstraint)
+        .def("ClearArraySizeConstraint", &This::ClearArraySizeConstraint)
+
         .def("ListTimeSamples", &_ListTimeSamples,
              return_value_policy<TfPySequenceToList>())
         .def("GetNumTimeSamples", &_GetNumTimeSamples)
@@ -211,12 +218,12 @@ void wrapAttributeSpec()
              &This::ClearSpline)
 
         // property keys
+        .setattr("ArraySizeConstraintKey", SdfFieldKeys->ArraySizeConstraint)
+        .setattr("ConnectionPathsKey", SdfFieldKeys->ConnectionPaths)
         // XXX DefaultValueKey are actually
         //     implemented on PropertySpec, but are only exposed on
         //     AttributeSpec for some reason
         .setattr("DefaultValueKey", SdfFieldKeys->Default)
-        
-        .setattr("ConnectionPathsKey", SdfFieldKeys->ConnectionPaths)
         .setattr("DisplayUnitKey", SdfFieldKeys->DisplayUnit)
         .setattr("LimitsKey", SdfFieldKeys->Limits)
         ;
