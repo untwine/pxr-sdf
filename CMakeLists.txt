@@ -414,6 +414,14 @@ pxr_build_test(testSdfUsdzResolver
         testenv/testSdfUsdzResolver.cpp
 )
 
+pxr_build_test(testSdfVariableExpression_Cpp
+    LIBRARIES
+        tf
+        sdf
+    CPPFILES
+        testenv/testSdfVariableExpression.cpp
+)
+
 pxr_build_test(testSdfFileVersion_Cpp
     LIBRARIES
         tf
@@ -727,6 +735,9 @@ pxr_register_test(testSdfUsdzResolver
 pxr_register_test(testSdfVariableExpression
     PYTHON
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfVariableExpression"
+)
+pxr_register_test(testSdfVariableExpression_Cpp
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfVariableExpression_Cpp"
 )
 pxr_register_test(testSdfVariants
     PYTHON
