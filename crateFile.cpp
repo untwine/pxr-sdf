@@ -1745,7 +1745,8 @@ struct CrateFile::_ValueHandler : _ValueHandlerBase
             target = ValueRepForArrayEdit<T>(w.Tell());
             w.Write(valuesRep);
             w.Write(indexesRep);
-            w.Write(arrayEdit.IsDenseArray());
+            w.Write(false); // former 'isDense' field -- array edits no longer
+                            // represent dense arrays.
         }
         return target;
     }
@@ -1767,8 +1768,12 @@ struct CrateFile::_ValueHandler : _ValueHandlerBase
         reader.crate->_UnpackValue(
             reader.template Read<ValueRep>(), &indexesArray);
 
-        *out = VtArrayEditBuilder<T>::CreateFromSerializationData(
-            valuesArray, indexesArray, reader.template Read<bool>());
+        // Discard former 'isDense' field -- array edits no longer represent
+        // dense arrays.
+        reader.template Read<bool>();
+        
+        *out = VtArrayEditBuilder<T>
+            ::CreateFromSerializationData(valuesArray, indexesArray);
     }
 
     ValueRep PackVtValue(_Writer w, VtValue const &v) {
