@@ -190,6 +190,7 @@ pxr_library(sdf
 
     DOXYGEN_FILES
         overview.dox
+        doxygen/booleanExpressions.md
         doxygen/fileFormatPlugin.dox
         doxygen/variableExpressions.dox
 )
