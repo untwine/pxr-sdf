@@ -28,8 +28,6 @@
 #include "pxr/usd/sdf/payload.h"
 #include "pxr/usd/sdf/schema.h"
 
-#include <tbb/parallel_for.h>
-
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -815,7 +813,7 @@ private:
         }
 
         // Create all the specData entries and store pointers to them.
-        tbb::parallel_for(
+        WorkParallelForTBBRange(
             tbb::blocked_range<size_t>(0, specs.size()),
             [this, crateFile, &liveFieldSets, &specs](
                 tbb::blocked_range<size_t> const &r) {
@@ -831,8 +829,7 @@ private:
                         liveFieldSets.find(spec.fieldSetIndex)->second;
                     
                 }
-            },
-            tbb::static_partitioner());
+            });
 
         _lastSet = _data.end();
 
