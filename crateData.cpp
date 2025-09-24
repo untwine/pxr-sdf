@@ -21,6 +21,7 @@
 
 #include "pxr/base/work/dispatcher.h"
 #include "pxr/base/work/loops.h"
+#include "pxr/base/work/sort.h"
 #include "pxr/base/work/utils.h"
 #include "pxr/base/work/withScopedParallelism.h"
 
@@ -28,7 +29,6 @@
 #include "pxr/usd/sdf/schema.h"
 
 #include <tbb/parallel_for.h>
-#include <tbb/parallel_sort.h>
 
 #include <algorithm>
 #include <functional>
@@ -115,8 +115,8 @@ public:
         for (auto const &p: _data) {
             sortedPaths.push_back(p.first);
         }
-        tbb::parallel_sort(
-            sortedPaths.begin(), sortedPaths.end(),
+        WorkParallelSort(
+            &sortedPaths,
             [](SdfPath const &p1, SdfPath const &p2) {
                 // Prim paths before property paths, then property paths grouped
                 // by property name.
