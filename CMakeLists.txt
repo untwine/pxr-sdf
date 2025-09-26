@@ -451,6 +451,16 @@ pxr_build_test(testSdfZipFile_CPP
         testenv/testSdfZipFile.cpp
 )
 
+pxr_build_test(testSdfUsdcInvalidPrimChildren
+    LIBRARIES
+        ar
+        arch
+        tf
+        sdf
+    CPPFILES
+        testenv/testSdfUsdcInvalidPrimChildren.cpp
+)
+
 pxr_install_test_dir(
     SRC testenv/testSdfBatchNamespaceEdit.testenv
     DEST testSdfBatchNamespaceEdit/testSdfBatchNamespaceEdit.testenv
@@ -499,6 +509,11 @@ pxr_install_test_dir(
 pxr_install_test_dir(
     SRC testenv/testSdfUsdzResolver
     DEST testSdfUsdzResolver
+)
+    
+pxr_install_test_dir(
+    SRC testenv/testSdfUsdcInvalidPrimChildren.testenv
+    DEST testSdfUsdcInvalidPrimChildren
 )
 
 pxr_register_test(testSdfAbstractData_Cpp
@@ -760,4 +775,8 @@ pxr_register_test(testSdfVariableExpressionAST_Cpp
 pxr_register_test(testSdfVariants
     PYTHON
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfVariants"
+)
+pxr_register_test(testSdfUsdcInvalidPrimChildren
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcInvalidPrimChildren"
+    EXPECTED_RETURN_CODE 0
 )
