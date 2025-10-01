@@ -32,6 +32,7 @@ pxr_library(sdf
         crateInfo
         data
         declareHandles
+        declareSpec
         fileFormat
         fileVersion
         identity
@@ -100,7 +101,6 @@ pxr_library(sdf
     PUBLIC_HEADERS
         api.h
         accessorHelpers.h
-        declareSpec.h
         layerHints.h
         pathPatternParser.h
         predicateExpressionParser.h

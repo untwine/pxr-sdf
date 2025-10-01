@@ -33,8 +33,6 @@ TF_DEFINE_ENV_SETTING(
     "Issue a warning when calling 'set' API for deprecated UI-related "
     "metadata fields (displayName, displayGroup, and hidden).");
 
-SDF_DEFINE_ABSTRACT_SPEC(SdfSchema, SdfPropertySpec, SdfSpec);
-
 //
 // Name
 //
