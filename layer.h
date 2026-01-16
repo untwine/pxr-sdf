@@ -1425,7 +1425,8 @@ public:
     /// The layer's root prims are namespace children of the pseudo-root.
     /// The pseudo-root exists to make the namespace hierarchy a tree
     /// instead of a forest.  This simplifies the implementation of
-    /// some algorithms.
+    /// some algorithms.  Note that the layer's metadata is considered owned
+    /// by the pseudo root spec.
     ///
     /// A layer always has a pseudo-root prim.
     SDF_API
