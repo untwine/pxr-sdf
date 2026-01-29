@@ -4236,7 +4236,13 @@ CrateFile::GetTypeid(ValueRep rep) const
 #define xx(ENUMNAME, _unused, T, SUPPORTSARRAY)                                \
         case TypeEnum::ENUMNAME:                                               \
             if constexpr (SUPPORTSARRAY) {                                     \
-                return rep.IsArray() ? typeid(VtArray<T>) : typeid(T);         \
+                if (rep.IsArray()) {                                           \
+                    return typeid(VtArray<T>);                                 \
+                }                                                              \
+                if (rep.IsArrayEdit()) {                                       \
+                    return typeid(VtArrayEdit<T>);                             \
+                }                                                              \
+                return typeid(T);                                              \
             }                                                                  \
             else {                                                             \
                 return typeid(T);                                              \
