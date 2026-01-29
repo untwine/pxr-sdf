@@ -1613,6 +1613,12 @@ public:
         return hasValue && (!outValue.isValueBlock);
     }
 
+    /// If there is a time sample authored at \p time, return its value's
+    /// typeid(), otherwise return typeid(void).
+    SDF_API
+    const std::type_info &
+    QueryTimeSampleTypeid(const SdfPath &path, double time) const;
+
     SDF_API
     void SetTimeSample(const SdfPath& path, double time, 
                        const VtValue & value);
