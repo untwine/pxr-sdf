@@ -101,6 +101,7 @@ pxr_library(sdf
     PUBLIC_HEADERS
         api.h
         accessorHelpers.h
+        composeTimeSampleSeries.h
         layerHints.h
         pathPatternParser.h
         predicateExpressionParser.h
