@@ -3792,10 +3792,6 @@ CrateFile::_ReadPathsImpl(Reader reader,
                 dispatcher.Run(
                     [this, reader,
                      siblingOffset, &dispatcher, parentPath]() {
-                        // XXX Remove these tags when bug #132031 is addressed
-                        TfAutoMallocTag tag(
-                            "Sdf", "Sdf_CrateDataImpl::Open",
-                            "Sdf_CrateFile::CrateFile::Open", "_ReadPaths");
                         auto readerCopy = reader;
                         readerCopy.Seek(siblingOffset);
                         _ReadPathsImpl<Header>(readerCopy, dispatcher, parentPath);
@@ -3944,10 +3940,6 @@ CrateFile::_BuildDecompressedPathsImpl(
                 dispatcher.Run(
                     [this, &pathIndexes, &elementTokenIndexes, &jumps,
                      siblingIndex, &dispatcher, parentPath]()  {
-                        // XXX Remove these tags when bug #132031 is addressed
-                        TfAutoMallocTag tag(
-                            "Sdf", "Sdf_CrateDataImpl::Open",
-                            "Sdf_CrateFile::CrateFile::Open", "_ReadPaths");
                         _BuildDecompressedPathsImpl(
                             pathIndexes, elementTokenIndexes, jumps,
                             siblingIndex, parentPath, dispatcher);
