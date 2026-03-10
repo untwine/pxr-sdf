@@ -66,6 +66,18 @@ TF_REGISTRY_FUNCTION(TfEnum)
 }
 
 template <class ListOp>
+static inline std::string _TruncateListOpString(ListOp const &listOp, 
+                                                size_t displayWidth){
+    std::string res = TfStringify(listOp);
+    // Shows displayWidth - 3 to ensure that the ellipsis is replacing at least
+    // 2 chars.
+    if (res.length() > displayWidth && displayWidth > 3) {
+        res = res.substr(0, displayWidth - 3) + "...";
+    }
+    return res;
+}
+
+template <class ListOp>
 static void _RegisterVtComposeOver() {
     VtRegisterComposeOver(
         +[](ListOp const &strong, ListOp const &weak) {
@@ -77,8 +89,8 @@ static void _RegisterVtComposeOver() {
             }
             TF_WARN("Failed to compose %s over %s because one or both use "
                     "'ordered' or 'added' operations.  Returning the stronger.",
-                    TfStringify(strong).c_str(),
-                    TfStringify(weak).c_str());
+                    _TruncateListOpString(strong, 100).c_str(),
+                    _TruncateListOpString(weak, 100).c_str());
             return strong;
         });
 
