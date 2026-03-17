@@ -6,13 +6,16 @@
 //
 
 #include "pxr/pxr.h"
+#include "pxr/usd/sdf/debugCodes.h"
 #include "pxr/usd/sdf/listOp.h"
 #include "pxr/usd/sdf/path.h"
 #include "pxr/usd/sdf/payload.h"
 #include "pxr/usd/sdf/reference.h"
 #include "pxr/usd/sdf/types.h"
+#include "pxr/base/tf/debug.h"
 #include "pxr/base/tf/denseHashSet.h"
 #include "pxr/base/tf/diagnostic.h"
+#include "pxr/base/tf/error.h"
 #include "pxr/base/tf/iterator.h"
 #include "pxr/base/tf/registryManager.h"
 #include "pxr/base/tf/stringUtils.h"
@@ -87,10 +90,16 @@ static void _RegisterVtComposeOver() {
             if (auto optComposed = strong.ApplyOperations(weak)) {
                 return *optComposed;
             }
-            TF_WARN("Failed to compose %s over %s because one or both use "
-                    "'ordered' or 'added' operations.  Returning the stronger.",
-                    _TruncateListOpString(strong, 100).c_str(),
-                    _TruncateListOpString(weak, 100).c_str());
+            std::string failedComposeMsg = TfStringPrintf(
+                "Failed to compose %s over %s because one or both use 'ordered'" 
+                " or 'added' operations.  Returning the stronger.",
+                _TruncateListOpString(strong, 100).c_str(),
+                _TruncateListOpString(weak, 100).c_str());
+            if (TfDebug::IsEnabled(SDF_ERROR_ON_FAILED_LISTOP_COMPOSE)) {
+                TF_RUNTIME_ERROR(failedComposeMsg);
+            } else {
+                TF_WARN(failedComposeMsg);
+            }
             return strong;
         });
 
@@ -423,6 +432,7 @@ SdfListOp<T>::ApplyOperations(ItemVector* vec, const ApplyCallback& cb) const
         size_t numToPrepend = _prependedItems.size();
         size_t numToAppend = _appendedItems.size();
         size_t numToOrder = _orderedItems.size();
+
 
         if (!cb &&
             ((numToDelete+numToAdd+numToPrepend+numToAppend+numToOrder) == 0)) {
