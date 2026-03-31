@@ -462,6 +462,14 @@ pxr_build_test(testSdfUsdcInvalidPrimChildren
         testenv/testSdfUsdcInvalidPrimChildren.cpp
 )
 
+pxr_build_test(testSdfUsdcVersioning
+    LIBRARIES
+        tf
+        sdf
+    CPPFILES
+        testenv/testSdfUsdcVersioning.cpp
+)
+
 pxr_register_test(testSdfAbstractData_Cpp
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfAbstractData_Cpp"
 )
@@ -742,5 +750,10 @@ pxr_register_test(testSdfVariants
 pxr_register_test(testSdfUsdcInvalidPrimChildren
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcInvalidPrimChildren"
     TESTENV testenv/testSdfUsdcInvalidPrimChildren.testenv
+    EXPECTED_RETURN_CODE 0
+)
+pxr_register_test(testSdfUsdcVersioning
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcVersioning"
+    TESTENV testenv/testSdfUsdcVersioning
     EXPECTED_RETURN_CODE 0
 )
