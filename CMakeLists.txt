@@ -756,4 +756,6 @@ pxr_register_test(testSdfUsdcVersioning
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcVersioning"
     TESTENV testenv/testSdfUsdcVersioning
     EXPECTED_RETURN_CODE 0
+    ENV 
+        PXR_USDC_EMIT_DEPRECATION_WARNINGS=1
 )
