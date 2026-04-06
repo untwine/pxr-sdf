@@ -752,10 +752,15 @@ pxr_register_test(testSdfUsdcInvalidPrimChildren
     TESTENV testenv/testSdfUsdcInvalidPrimChildren.testenv
     EXPECTED_RETURN_CODE 0
 )
-pxr_register_test(testSdfUsdcVersioning
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcVersioning"
-    TESTENV testenv/testSdfUsdcVersioning
-    EXPECTED_RETURN_CODE 0
-    ENV 
-        PXR_USDC_EMIT_DEPRECATION_WARNINGS=1
-)
+
+# This test is disabled for emscripten builds because it depends on
+# environment variables, which are currently unsupported in that configuration.
+if (NOT EMSCRIPTEN)
+    pxr_register_test(testSdfUsdcVersioning
+        COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcVersioning"
+        TESTENV testenv/testSdfUsdcVersioning
+        EXPECTED_RETURN_CODE 0
+        ENV 
+            PXR_USDC_EMIT_DEPRECATION_WARNINGS=1
+    )
+endif()
