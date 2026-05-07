@@ -69,5 +69,14 @@ class TestSdfSplineVersioning(unittest.TestCase):
         algorithmVersions = self._CheckVersions()
         self.assertEqual(algorithmVersions, ('0.13.0', '1.1', '0.13.0'))
 
+        # Add loopBoundaryTime to looping extrapolation
+        extrap = Ts.Extrapolation(Ts.ExtrapLoopRepeat)
+        extrap.loopBoundaryTime = 1.0
+        spline.SetPreExtrapolation(extrap)
+        self.attr.SetSpline(spline)
+
+        algorithmVersions = self._CheckVersions()
+        self.assertEqual(algorithmVersions, ('0.15.0', '1.3', '0.15.0'))
+
 if __name__ == '__main__':
     unittest.main()
