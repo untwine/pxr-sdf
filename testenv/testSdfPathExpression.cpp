@@ -364,6 +364,43 @@ TestBasics()
             TF_AXIOM(eval.Match(SdfPath("/Home/bar")));
             TF_AXIOM(eval.Match(SdfPath("/Home/test/baz/qux")));
             TF_AXIOM(eval.Match(SdfPath("/Home/test/baz/a/b/c/qux")));
+
+            // Test ReplacePrefix when newPrefix is empty. This should remove all
+            // expression refs and path patterns that had oldPrefix.
+            SdfPathExpression noPrefix("/World/test/foo /World/bar "
+                "/World/test/baz//qux %/World/test:otherRef /Other/foo* //World");
+
+            SdfPathExpression after = noPrefix.ReplacePrefix(
+                SdfPath("/World"), SdfPath());
+            TF_AXIOM(after.GetText() == "/Other/foo* //World");
+
+            auto evl = MatchEval { after };
+            TF_AXIOM(!evl.Match(SdfPath("/World/test/foo")));
+            TF_AXIOM(!evl.Match(SdfPath("/World/bar")));
+            TF_AXIOM(!evl.Match(SdfPath("/World/test/baz/qux")));
+            TF_AXIOM(evl.Match(SdfPath("/Other/foobar")));
+            TF_AXIOM(evl.Match(SdfPath("/World")));
+
+            // Ensure the path expression resolves to nothing if its only contents are
+            // a prefix that is deleted.
+            noPrefix = SdfPathExpression("/World/bar");
+            after = noPrefix.ReplacePrefix(SdfPath("/World/bar"), SdfPath(""));
+            TF_AXIOM(after == SdfPathExpression::Nothing());
+
+            evl = MatchEval { after };
+            TF_AXIOM(!evl.Match(SdfPath("/World/bar")));
+
+            // Ensure the path expression can resolve to everything
+            SdfPathExpression everything("~/foo/bar");
+            evl = MatchEval { everything };
+            TF_AXIOM(!evl.Match(SdfPath("/foo/bar")));
+            TF_AXIOM(evl.Match(SdfPath("/baz")));
+            after = everything.ReplacePrefix(SdfPath("/foo"), SdfPath(""));
+
+            evl = MatchEval { after };
+            TF_AXIOM(after == SdfPathExpression::Everything());
+            TF_AXIOM(evl.Match(SdfPath("/foo/bar")));
+            TF_AXIOM(evl.Match(SdfPath("/baz")));
         }
     }
 

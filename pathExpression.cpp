@@ -286,16 +286,76 @@ SdfPathExpression::Walk(
 SdfPathExpression
 SdfPathExpression::ReplacePrefix(SdfPath const &oldPrefix,
                                  SdfPath const &newPrefix) &&
-{
-    // We are an rvalue so we mutate & return ourselves.
-    for (auto &ref: _refs) {
-        ref.path = ref.path.ReplacePrefix(oldPrefix, newPrefix);
+{    
+    if (IsEmpty()) {
+        return {};
     }
-    for (auto &pattern: _patterns) {
-        pattern.SetPrefix(
-            pattern.GetPrefix().ReplacePrefix(oldPrefix, newPrefix));
-    }
-    return std::move(*this);
+        
+    std::vector<SdfPathExpression> stack;
+    
+    // Make no changes to logical operators.
+    auto logic = [&stack](Op op, int argIndex) {
+        if (op == Complement) {
+            if (argIndex == 1) {
+                stack.back() = MakeComplement(std::move(stack.back()));
+            }
+        }
+        else {
+            if (argIndex == 2) {
+                SdfPathExpression arg2 = std::move(stack.back());
+                stack.pop_back();
+                stack.back() = MakeOp(
+                    op, std::move(stack.back()), std::move(arg2));
+            }
+        }
+    };
+
+    auto replaceRefPrefix = [&stack, &oldPrefix, &newPrefix](ExpressionReference const &ref) {
+        // If the expression reference path doesn't have oldPrefix, keep it 
+        // unchanged.
+        if (!ref.path.HasPrefix(oldPrefix)) {
+            stack.push_back(MakeAtom(ref));
+            return;
+        }
+        ExpressionReference newRef (ref);
+        newRef.path = newRef.path.ReplacePrefix(oldPrefix, newPrefix);
+
+        // If replacing the prefix returns an empty path, we set the current
+        // expression reference to empty. Otherwise, we save the updated path.
+        if (newRef.path.IsEmpty() && !ref.path.IsEmpty()) {
+            stack.push_back(SdfPathExpression::Nothing());
+        } else {
+            stack.push_back(MakeAtom(newRef));
+        }
+    };
+    
+    auto replacePatternPrefix = [&stack, &oldPrefix, &newPrefix](PathPattern const &pattern) {
+        // If the pattern doesn't have oldPrefix, keep it unchanged.
+        if (!pattern.GetPrefix().HasPrefix(oldPrefix)) {
+            stack.push_back(MakeAtom(pattern));
+            return;
+        }
+
+        SdfPath newPatternPrefix = 
+            pattern.GetPrefix().ReplacePrefix(oldPrefix, newPrefix);
+
+        // If replacing the prefix returns an empty path, we set the current
+        // pattern to empty. Otherwise, we save the updated pattern.
+        if (newPatternPrefix.IsEmpty() && !pattern.GetPrefix().IsEmpty()) {
+            stack.push_back(SdfPathExpression::Nothing());
+        } else {
+            PathPattern newPattern(pattern);
+            newPattern.SetPrefix(newPatternPrefix);
+            stack.push_back(MakeAtom(newPattern));
+        }
+    };
+
+    // Walk, replacing prefixes.
+    Walk(logic, replaceRefPrefix, replacePatternPrefix);
+
+    TF_DEV_AXIOM(stack.size() == 1);
+
+    return std::move(stack.back());
 }
 
 bool
