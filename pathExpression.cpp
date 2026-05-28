@@ -628,37 +628,43 @@ namespace {
 
 using namespace PXR_PEGTL_NAMESPACE;
 
-template <class Rule, class Sep>
-using LookaheadList = seq<Rule, star<at<Sep, Rule>, Sep, Rule>>;
-
 template <class Rule> using OptSpaced = pad<Rule, blank>;
 
 ////////////////////////////////////////////////////////////////////////
 // Expression references.
-struct DotDot : two<'.'> {};
+struct DotDot  : two<'.'> {};
 struct DotDots : list<DotDot, one<'/'>> {};
 
-struct ExpressionRefName : seq<one<':'>, identifier> {};
+// Named so the Errors class can target it for both ':' and '/' contexts.
+struct ExpressionRefIdent : identifier {};
+
+// ':' commits to requiring an identifier (the reference name).
+struct ExpressionRefName : if_must<one<':'>, ExpressionRefIdent> {};
+
+// '/' commits to requiring an identifier (a path component).
+struct ExpressionRefPathSep : if_must<one<'/'>, ExpressionRefIdent> {};
 
 struct ExpressionRefPathAndName :
-    seq<list<identifier, one<'/'>>, ExpressionRefName> {};
+    seq<ExpressionRefIdent, star<ExpressionRefPathSep>, ExpressionRefName> {};
 
-struct AbsExpressionRefPath : seq<one<'/'>, ExpressionRefPathAndName> {};
+// '/' at absolute start commits to requiring a path-and-name.
+struct AbsExpressionRefPath : if_must<one<'/'>, ExpressionRefPathAndName> {};
 
+// '/' after optional DotDots commits to a path-and-name;
+// no '/' means just a bare ':name' reference.
 struct RelExpressionRefPath :
     seq<opt<DotDots>,
-        if_then_else<one<'/'>,
+        if_must_else<one<'/'>,
                      ExpressionRefPathAndName, ExpressionRefName>> {};
 
-struct ExpressionRefPath : sor<AbsExpressionRefPath, RelExpressionRefPath> {};
+struct ExpressionRefPath :
+    sor<AbsExpressionRefPath, RelExpressionRefPath> {};
 
 struct WeakerRef :
     seq<string<'%', '_'>, not_at<sor<identifier_other, one<':'>>>> {};
 
-struct ExpressionReference : sor<
-    WeakerRef,
-    seq<one<'%'>, ExpressionRefPath>
-    > {};
+struct ExpressionReference :
+    sor<WeakerRef, seq<one<'%'>, ExpressionRefPath>> {};
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -666,31 +672,83 @@ struct ExpressionReference : sor<
 
 struct PathExpr;
 
-struct PathExprOpenGroup : one<'('> {};
+struct PathExprOpenGroup  : one<'('> {};
 struct PathExprCloseGroup : one<')'> {};
+
+// Named wrapper so a '(' that commits to a group gets a targeted error message.
+struct GroupedPathExpr : OptSpaced<PathExpr> {};
 
 struct PathExprAtom
     : sor<
     ExpressionReference,
     SdfPathPatternParser::PathPattern,
-    if_must<PathExprOpenGroup, OptSpaced<PathExpr>, PathExprCloseGroup>
+    if_must<PathExprOpenGroup, GroupedPathExpr, PathExprCloseGroup>
     >
 {};
 
-struct PathSetComplement : one<'~'> {};
-struct PathSetImpliedUnion : plus<blank> {};
-struct PathSetUnion : one<'+'> {};
-struct PathSetIntersection : one<'&'> {};
-struct PathSetDifference : one<'-'> {};
+struct PathSetComplement    : one<'~'> {};
+struct PathSetImpliedUnion  : plus<blank> {};
+struct PathSetUnion         : one<'+'> {};
+struct PathSetIntersection  : one<'&'> {};
+struct PathSetDifference    : one<'-'> {};
 
 struct PathFactor : seq<opt<OptSpaced<PathSetComplement>>, PathExprAtom> {};
 
-struct PathOperator : sor<OptSpaced<PathSetUnion>,
-                          OptSpaced<PathSetIntersection>,
-                          OptSpaced<PathSetDifference>,
-                          PathSetImpliedUnion> {};
+// Explicit binary operators: once consumed, a PathFactor is required.
+// opt<> around the whole expression keeps implicit union as a fallback.
+struct ExplicitPathOperator : sor<
+    OptSpaced<PathSetUnion>,
+    OptSpaced<PathSetIntersection>,
+    OptSpaced<PathSetDifference>> {};
 
-struct PathExpr : LookaheadList<PathFactor, PathOperator> {};
+struct PathExprStep : if_must<ExplicitPathOperator, PathFactor> {};
+
+// Implied union (whitespace-separated): lookahead required because trailing
+// whitespace must not commit to a following factor.
+struct ImpliedUnionStep : seq<
+    at<seq<PathSetImpliedUnion, PathFactor>>,
+    PathSetImpliedUnion,
+    PathFactor> {};
+
+struct PathExpr : seq<PathFactor, star<sor<PathExprStep, ImpliedUnionStep>>> {};
+
+// Named wrapper so the Errors class can provide a top-level message when
+// the entire expression fails to match.
+struct TopLevelPathExpr : OptSpaced<PathExpr> {};
+
+// Wrap eolf so we can attach a targeted error message without specializing
+// the PEGTL built-in directly.
+struct PathExprEnd : eolf {};
+
+////////////////////////////////////////////////////////////////////////
+// Errors
+//
+// Inherits from SdfPathPatternParser::Errors, which in turn inherits from
+// SdfPredicateExpressionParser::Errors. Each layer handles only its own
+// grammar's rules; errors from embedded grammars propagate automatically.
+
+template <class Rule>
+struct Errors : SdfPathPatternParser::Errors<Rule> {};
+
+#define PARSE_ERROR(rule, msg)                                              \
+    template <> struct Errors<rule>                                         \
+        : SdfPathPatternParser::Errors<rule> {                              \
+        template <class Input, class... States>                             \
+        [[noreturn]] static void raise(Input const &in, States &&...) {     \
+            throw parse_error(msg, in);                                     \
+        }                                                                   \
+    }
+
+PARSE_ERROR(TopLevelPathExpr,        "expected path expression");
+PARSE_ERROR(PathExprEnd,             "expected end of path expression");
+PARSE_ERROR(PathFactor,              "expected path expression after operator");
+PARSE_ERROR(GroupedPathExpr,         "expected path expression after '('");
+PARSE_ERROR(PathExprCloseGroup,      "expected ')' to close expression group");
+PARSE_ERROR(ExpressionRefIdent,      "expected identifier");
+PARSE_ERROR(ExpressionRefPathAndName,"expected expression reference path "
+                                     "after '/'");
+
+#undef PARSE_ERROR
 
 ////////////////////////////////////////////////////////////////////////
 // Actions /////////////////////////////////////////////////////////////
@@ -776,7 +834,7 @@ struct PathExprAction<SdfPathPatternParser::PathPattern>
 } // anon
 
 ////////////////////////////////////////////////////////////////////////
-// Parsing drivers.
+// Parsing driver.
 
 static bool
 ParsePathExpression(std::string const &inputStr,
@@ -786,7 +844,7 @@ ParsePathExpression(std::string const &inputStr,
 {
     Sdf_PathExprBuilder builder;
     try {
-        parse<must<pad<PathExpr, blank>, eolf>, PathExprAction>(
+        parse<must<TopLevelPathExpr, PathExprEnd>, PathExprAction, Errors>(
             string_input<> { inputStr,
                 parseContext.empty() ? "<input>" : parseContext.c_str()
             }, builder);
@@ -795,18 +853,26 @@ ParsePathExpression(std::string const &inputStr,
         }
     }
     catch (parse_error const &err) {
-        std::string errMsg = err.what();
-        errMsg += " -- ";
-        bool first = true;
-        for (position const &p: err.positions()) {
-            if (!first) {
-                errMsg += ", ";
-            }
-            first = false;
-            errMsg += to_string(p);
-        }
         if (errMsgOut) {
-            *errMsgOut = std::move(errMsg);
+            std::string location;
+            auto const &positions = err.positions();
+            if (!positions.empty()) {
+                // column is 1-based
+                const size_t col = positions.front().column;
+                const size_t idx = col - 1;
+                if (col >= 1 && idx < inputStr.size()) {
+                    location = TfStringPrintf(
+                        " at character %zu ('%c')", col, inputStr[idx]);
+                }
+                else {
+                    location = TfStringPrintf(" at character %zu", col);
+                }
+            }
+            *errMsgOut = TfStringPrintf(
+                "Ill-formed path expression <%s>%s: %s",
+                inputStr.c_str(),
+                location.c_str(),
+                std::string(err.message()).c_str());
         }
         return false;
     }
