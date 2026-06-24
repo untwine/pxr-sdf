@@ -35,6 +35,7 @@ pxr_library(sdf
         declareSpec
         fileFormat
         fileVersion
+        globPattern
         identity
         layer
         layerOffset
@@ -316,6 +317,13 @@ pxr_build_test(testSdfBooleanExpression
         testenv/testSdfBooleanExpression.cpp
 )
 
+pxr_build_test(testSdfGlobPattern
+    LIBRARIES
+        sdf
+    CPPFILES
+        testenv/testSdfGlobPattern.cpp
+)
+      
 pxr_build_test(testSdfHardToReach
     LIBRARIES
         sdf
@@ -535,6 +543,10 @@ pxr_register_test(testSdfDetachedLayerEnvVar2
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfDetachedLayer"
 )
 
+pxr_register_test(testSdfGlobPattern
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfGlobPattern"
+)
+  
 pxr_register_test(testSdfHardToReach
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfHardToReach"
 )
