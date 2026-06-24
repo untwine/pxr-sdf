@@ -78,5 +78,25 @@ class TestSdfSplineVersioning(unittest.TestCase):
         algorithmVersions = self._CheckVersions()
         self.assertEqual(algorithmVersions, ('0.15.0', '1.3', '0.15.0'))
 
+        # Create a spline with GfTimeCode as the value type
+        spline = Ts.Spline("timecode")
+        self.attr = Sdf.CreatePrimAttributeInLayer(self.layer,
+                                                   '/Prim.timeValue',
+                                                   Sdf.ValueTypeNames.TimeCode)
+        self.attr.SetSpline(spline)
+        print("spline type name", Ts.Spline("timecode").GetValueTypeName())
+        algorithmVersions = self._CheckVersions()
+        self.assertEqual(algorithmVersions, ('0.15.0', '1.3', '0.15.0'))
+
+        # Confirm that resetting the spline brings us back to the minimum
+        # spline version
+        spline = Ts.Spline()
+        self.attr = Sdf.CreatePrimAttributeInLayer(self.layer,
+                                                   '/Prim.origValue',
+                                                   Sdf.ValueTypeNames.Double)
+        self.attr.SetSpline(spline)
+        algorithmVersions = self._CheckVersions()
+        self.assertEqual(splineVersions, ('0.12.0', '1.0', '0.12.0'))
+
 if __name__ == '__main__':
     unittest.main()
