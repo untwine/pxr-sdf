@@ -468,6 +468,14 @@ pxr_build_test(testSdfUsdcInvalidPrimChildren
         testenv/testSdfUsdcInvalidPrimChildren.cpp
 )
 
+pxr_build_test(testSdfUsdcMalformed
+    LIBRARIES
+        tf
+        sdf
+    CPPFILES
+        testenv/testSdfUsdcMalformed.cpp
+)
+
 pxr_build_test(testSdfUsdcVersioning
     LIBRARIES
         tf
@@ -762,6 +770,25 @@ pxr_register_test(testSdfUsdcInvalidPrimChildren
     COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcInvalidPrimChildren"
     TESTENV testenv/testSdfUsdcInvalidPrimChildren.testenv
     EXPECTED_RETURN_CODE 0
+)
+pxr_register_test(testSdfUsdcMalformed
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
+    TESTENV testenv/testSdfUsdcMalformed
+    EXPECTED_RETURN_CODE 0
+)
+pxr_register_test(testSdfUsdcMalformed_PREAD
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
+    TESTENV testenv/testSdfUsdcMalformed
+    EXPECTED_RETURN_CODE 0
+    ENV 
+        USDC_USE_PREAD=1
+)
+pxr_register_test(testSdfUsdcMalformed_ASSET
+    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
+    TESTENV testenv/testSdfUsdcMalformed
+    EXPECTED_RETURN_CODE 0
+    ENV 
+        USDC_USE_ASSET=1
 )
 
 # This test is disabled for emscripten builds because it depends on
