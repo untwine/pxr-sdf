@@ -190,7 +190,7 @@ TF_DEFINE_ENV_SETTING(
     "implementations.");
 
 TF_DEFINE_ENV_SETTING(
-    PXR_USDC_EMIT_DEPRECATION_WARNINGS, false,
+    PXR_USDC_EMIT_DEPRECATION_WARNINGS, true,
     "If set, emit warnings when reading binary USD files with deprecated "
     "versions prior to " OLDEST_CURRENT_VERSION ".");
 
