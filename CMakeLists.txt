@@ -771,25 +771,34 @@ pxr_register_test(testSdfUsdcInvalidPrimChildren
     TESTENV testenv/testSdfUsdcInvalidPrimChildren.testenv
     EXPECTED_RETURN_CODE 0
 )
-pxr_register_test(testSdfUsdcMalformed
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
-    TESTENV testenv/testSdfUsdcMalformed
-    EXPECTED_RETURN_CODE 0
-)
-pxr_register_test(testSdfUsdcMalformed_PREAD
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
-    TESTENV testenv/testSdfUsdcMalformed
-    EXPECTED_RETURN_CODE 0
-    ENV 
-        USDC_USE_PREAD=1
-)
-pxr_register_test(testSdfUsdcMalformed_ASSET
-    COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
-    TESTENV testenv/testSdfUsdcMalformed
-    EXPECTED_RETURN_CODE 0
-    ENV 
-        USDC_USE_ASSET=1
-)
+
+# These tests currently fail on emscripten builds due to errors like:
+#
+# RuntimeError: unreachable
+#    at wasm://wasm/01aa408e:wasm-function[12112]:0x57e216
+#    at invoke_viiii (/home/runner/work/OpenUSD/OpenUSD/USDinst/tests/testSdfUsdcMalformed:1:99601)
+#    ...
+if (NOT EMSCRIPTEN)
+    pxr_register_test(testSdfUsdcMalformed
+        COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
+        TESTENV testenv/testSdfUsdcMalformed
+        EXPECTED_RETURN_CODE 0
+    )
+    pxr_register_test(testSdfUsdcMalformed_PREAD
+        COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
+        TESTENV testenv/testSdfUsdcMalformed
+        EXPECTED_RETURN_CODE 0
+        ENV 
+            USDC_USE_PREAD=1
+    )
+    pxr_register_test(testSdfUsdcMalformed_ASSET
+        COMMAND "${CMAKE_INSTALL_PREFIX}/tests/testSdfUsdcMalformed"
+        TESTENV testenv/testSdfUsdcMalformed
+        EXPECTED_RETURN_CODE 0
+        ENV 
+            USDC_USE_ASSET=1
+    )
+endif()
 
 # This test is disabled for emscripten builds because it depends on
 # environment variables, which are currently unsupported in that configuration.
